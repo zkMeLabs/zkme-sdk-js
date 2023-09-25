@@ -1,6 +1,4 @@
 import type { WidgetOptions, VerificationLevel, LoginMode, Theme, ZkMeWidgetMessageBody, Provider, TransactionRequest, CosmosTransactionRequest, ZkMeWidgetEvent, FinishedHook, ZkMeWidgetMemberIndex, ZkMeWidget as _ZkMeWidget } from '..'
-import { verifyKYCWithZkMeServices } from './verify'
-
 
 export const ZKME_WIDGET_ORIGIN = import.meta.env.VITE_ZKME_WIDGET_ORIGIN || 'https://widget.zk.me'
 
@@ -305,9 +303,5 @@ export class ZkMeWidget implements _ZkMeWidget {
       document.body.removeChild(this.#widgetMask)
       this.#widgetMask = this.#widgetWrap = this.#widgetNode = null
     }
-  }
-
-  static async verifyKYCWithZkMeServices(appId: string, userAccount: string) {
-    return verifyKYCWithZkMeServices(appId, userAccount)
   }
 }

@@ -175,14 +175,6 @@ export declare class ZkMeWidget implements ZkMeWidgetMember {
   on(event: 'close', callback: () => void): void
 
   destroy(): void
-
-  /**
-   * Verify that users pass your KYC requirements.
-   *
-   * @param appId appId is the same as mchNo.
-   * @param userAccount User's wallet address.
-   */
-  static verifyKYCWithZkMeServices(appId: string, userAccount: string): Promise<boolean>
 }
 
 export declare const ZKME_WIDGET_ORIGIN: string
