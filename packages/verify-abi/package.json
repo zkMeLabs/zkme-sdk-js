@@ -1,0 +1,23 @@
+{
+  "name": "@zkme/verify-abi",
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "index.cjs",
+    "index.js"
+  ],
+  "main": "./index.cjs",
+  "module": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.cjs"
+    }
+  },
+  "author": {
+    "name": "zkMeLabs",
+    "url": "https://zk.me/"
+  },
+  "license": "MIT"
+}

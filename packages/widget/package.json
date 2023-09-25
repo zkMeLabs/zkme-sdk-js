@@ -1,0 +1,36 @@
+{
+  "name": "@zkme/widget",
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "dist",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./verify": {
+      "import": "./dist/verify.js",
+      "require": "./dist/verify.cjs"
+    },
+    "./widget": {
+      "import": "./dist/widget.js",
+      "require": "./dist/widget.cjs"
+    },
+    "./dist/style.css": "./dist/style.css"
+  },
+  "author": {
+    "name": "zkMeLabs",
+    "url": "https://zk.me/"
+  },
+  "license": "MIT"
+}

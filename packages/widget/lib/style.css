@@ -1,0 +1,40 @@
+.zkme-widget-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: rgba(18, 20, 29, 0.66);
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.zkme-fade {
+  opacity: 1;
+}
+
+.zkme-widget-wrap {
+  width: 510px;
+  height: 700px;
+  border-radius: 20px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.zkme-widget-wrap iframe {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+@media screen and (max-width: 510px) {
+  .zkme-widget-wrap {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+}
