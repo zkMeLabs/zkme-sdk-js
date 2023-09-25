@@ -28,6 +28,12 @@
     },
     "./dist/style.css": "./dist/style.css"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zkMeLabs/zkme-sdk-js.git",
+    "directory": "packages/widget"
+  },
+  "homepage": "https://github.com/zkMeLabs/zkme-sdk-js#readme",
   "author": {
     "name": "zkMeLabs",
     "url": "https://zk.me/"

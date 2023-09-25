@@ -19,5 +19,10 @@
     "name": "zkMeLabs",
     "url": "https://zk.me/"
   },
+  "homepage": "https://zk.me/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zkMeLabs/zkme-sdk-js.git"
+  },
   "license": "MIT"
 }

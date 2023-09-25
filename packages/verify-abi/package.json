@@ -15,6 +15,12 @@
       "require": "./index.cjs"
     }
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zkMeLabs/zkme-sdk-js.git",
+    "directory": "packages/verify-abi"
+  },
+  "homepage": "https://github.com/zkMeLabs/zkme-sdk-js#readme",
   "author": {
     "name": "zkMeLabs",
     "url": "https://zk.me/"
