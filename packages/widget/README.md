@@ -1,5 +1,7 @@
 # zkMe zkKYC and Anti-Sybil SDK
 
+zkMe zkKYC and Anti-Sybil SDK.
+
 ## Getting Started
 
 1. Installation.
