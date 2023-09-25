@@ -4,23 +4,23 @@
 
 1. Installation.
 ``` shell
-pnpm add @zkme/widget
+pnpm add @zkmelabs/widget
 
 # or
-yarn add @zkme/widget
+yarn add @zkmelabs/widget
 
 # or
-npm install @zkme/widget
+npm install @zkmelabs/widget
 ```
 
 2. Import styles.
 ``` javascript
-import '@zkme/widget/dist/style.css'
+import '@zkmelabs/widget/dist/style.css'
 ```
 
 3. Create a new ``ZkMeWidget`` instance.
 ``` javascript
-import { ZkMeWidget, type Provider } from '@zkme/widget'
+import { ZkMeWidget, type Provider } from '@zkmelabs/widget'
 
 const provider: Provider = {
   async getAccessToken() {
@@ -56,7 +56,7 @@ zkMeWidget.launch()
 Before launching the zkMe widget, you may need to check the user's KYC status first
 
 ``` typescript
-import { verifyKYCWithZkMeServices } from '@zkme/widget'
+import { verifyKYCWithZkMeServices } from '@zkmelabs/widget'
 
 const results: boolean = await verifyKYCWithZkMeServices(
   appId, // This parameter means the same thing as "mchNo"

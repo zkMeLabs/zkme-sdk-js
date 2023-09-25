@@ -1,5 +1,5 @@
 {
-  "name": "@zkme/zkme-sdk-js-monorepo",
+  "name": "@zkmelabs/zkme-sdk-js-monorepo",
   "private": "true",
   "description": "zkMe SDK for JavaScript",
   "scripts": {
@@ -13,7 +13,7 @@
   "keywords": [
     "zkme",
     "zkkyc",
-    "anti-sybil"
+    "zkme-contract"
   ],
   "author": {
     "name": "zkMeLabs",

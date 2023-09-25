@@ -1,5 +1,5 @@
 {
-  "name": "@zkme/widget",
+  "name": "@zkmelabs/widget",
   "version": "0.1.0",
   "type": "module",
   "files": [
@@ -34,6 +34,11 @@
     "directory": "packages/widget"
   },
   "homepage": "https://github.com/zkMeLabs/zkme-sdk-js#readme",
+  "keywords": [
+    "zkme",
+    "zkkyc",
+    "anti-sybil"
+  ],
   "author": {
     "name": "zkMeLabs",
     "url": "https://zk.me/"

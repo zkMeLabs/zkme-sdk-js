@@ -4,18 +4,18 @@ A simple NPM package that exports the Smart Contract ABI for zkMe Verify & Certi
 
 ## Installation
 ``` shell
-pnpm add @zkme/verify-abi
+pnpm add @zkmelabs/verify-abi
 
 # or
-yarn add @zkme/verify-abi
+yarn add @zkmelabs/verify-abi
 
 # or
-npm install @zkme/verify-abi
+npm install @zkmelabs/verify-abi
 ```
 
 ## Example of Goerli test network
 ``` typescript
-import zkMeVerifyAbi from '@zkme/verify-abi'
+import zkMeVerifyAbi from '@zkmelabs/verify-abi'
 import { Contract, JsonRpcProvider } from 'ethers'
 
 const zkMeContract = new Contract(

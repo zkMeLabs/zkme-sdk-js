@@ -1,1 +1,1 @@
-declare module '@zkme/verify-abi'
+declare module '@zkmelabs/verify-abi'
