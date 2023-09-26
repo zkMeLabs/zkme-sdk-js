@@ -65,4 +65,8 @@ const results: boolean = await verifyKYCWithZkMeServices(
   userAccount // User's wallet address
 )
 
+if (!results) {
+  zkMeWidget.launch()
+}
+
 ```
