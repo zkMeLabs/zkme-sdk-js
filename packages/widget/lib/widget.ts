@@ -48,7 +48,6 @@ export class ZkMeWidget implements _ZkMeWidget {
   #checkAddress?: boolean
 
   #widgetMask: HTMLDivElement | null = null
-  #widgetWrap: HTMLDivElement | null = null
   #widgetNode: HTMLIFrameElement | null = null
 
   #visibility: boolean = false
@@ -232,21 +231,18 @@ export class ZkMeWidget implements _ZkMeWidget {
       return
     }
     this.#widgetMask = document.createElement('div')
-    this.#widgetWrap = document.createElement('div')
-    this.#widgetNode = document.createElement('iframe')
-
     this.#widgetMask.classList.add('zkme-widget-mask', 'zkme-fl-central')
-    this.#widgetWrap.classList.add('zkme-widget-wrap')
-    this.#widgetNode.width = '100%'
-    this.#widgetNode.height = '100%'
-    this.#widgetNode.allow = 'camera'
 
     const maxZIndex = getMaxZIndex()
-    this.#widgetMask.style.zIndex = String(maxZIndex + 1)
+    const src = this.#generateUrl()
 
-    this.#widgetNode.src = this.#generateUrl()
-    this.#widgetWrap.appendChild(this.#widgetNode)
-    this.#widgetMask.appendChild(this.#widgetWrap)
+    this.#widgetMask.style.zIndex = `${maxZIndex + 1}`
+    this.#widgetMask.innerHTML = `
+      <div class="zkme-widget-wrap">
+        <iframe src="${src}" width="100%" height="100%"></iframe>
+      </div>
+    `
+    this.#widgetNode = this.#widgetMask.querySelector(`iframe`)
     document.body.appendChild(this.#widgetMask)
     this.show()
   }
@@ -301,7 +297,7 @@ export class ZkMeWidget implements _ZkMeWidget {
     window.removeEventListener('message', this.#listener)
     if (this.#widgetMask) {
       document.body.removeChild(this.#widgetMask)
-      this.#widgetMask = this.#widgetWrap = this.#widgetNode = null
+      this.#widgetMask = this.#widgetNode = null
     }
   }
 }
