@@ -298,7 +298,7 @@ export class ZkMeWidget implements _ZkMeWidget {
   }
 
   destroy() {
-    window.addEventListener('message', this.#listener)
+    window.removeEventListener('message', this.#listener)
     if (this.#widgetMask) {
       document.body.removeChild(this.#widgetMask)
       this.#widgetMask = this.#widgetWrap = this.#widgetNode = null
