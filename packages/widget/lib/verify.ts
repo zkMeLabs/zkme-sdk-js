@@ -6,9 +6,6 @@ type ResultBody = {
 }
 
 export async function verifyKYCWithZkMeServices (appId: string, userAccount: string): Promise<boolean> {
-  if (!userAccount.match(/^(0x)?[0-9a-fA-F]{40}$/)) {
-    throw new Error('Invalid user account')
-  }
   return fetch('https://nest-api.zk.me/api/grant/check', {
     method: 'POST',
     headers: {

@@ -1,0 +1,6 @@
+projectKey=zkme-sdk-js
+serverUrl=https://s7e.bitkinetic.com
+serverVersion=10.2.1.78527
+dashboardUrl=https://s7e.bitkinetic.com/dashboard?id=zkme-sdk-js
+ceTaskId=AYtk2XuQk31nXKkvX4Oc
+ceTaskUrl=https://s7e.bitkinetic.com/api/ce/task?id=AYtk2XuQk31nXKkvX4Oc

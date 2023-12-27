@@ -45,12 +45,32 @@ export type CosmosTransactionRequest = {
   msg: any
 }
 
+export type AptosTransactionRequest = {
+  function: string
+  type_arguments: Array<string>
+  arguments: Array<any>
+}
+
 export type StdSignature = {
   pub_key: {
     type: string
     value: any
   }
   signature: string
+}
+
+export type AptosSignMessagePayload = {
+  address?: boolean; // Should we include the address of the account in the message
+  application?: boolean; // Should we include the domain of the dapp
+  chainId?: boolean; // Should we include the current chain id the wallet is connected to
+  message: string; // The message to be signed and displayed to the user
+  nonce: number | string; // A nonce the dapp should generate
+}
+
+export type AptosSignature = {
+  signature: string
+  publicKey: string
+  fullMessage: string
 }
 
 export type ZkMeWidgetEvent = 'close' | 'finished'
@@ -84,6 +104,10 @@ export interface Provider {
    */
   delegateCosmosTransaction?(tx: CosmosTransactionRequest): Promise<TransactionHash>
   /**
+   * This method is the same as ``delegateTransaction``, but it is an Aptos blockchain transaction, just implement one of them depending on the type of blockchain your project is running on.
+   */
+  delegateAptosTransaction?(tx: AptosTransactionRequest): Promise<TransactionHash>
+  /**
    * This method is used to get a new AccessToken from you.
    */
   getAccessToken(): Promise<string>
@@ -91,13 +115,17 @@ export interface Provider {
    * This method is used to request a signature from the user to ensure that their wallet address is valid. This method must be implemented when ``options.checkAddress`` is ``true``
    */
   signMessage?(message: string): Promise<string | StdSignature>
+  /**
+   * This method is the same as ``signMessage``, just implement one of them depending on the type of blockchain your project is running on.
+   */
+  signAptosMessage?(payload: AptosSignMessagePayload): Promise<AptosSignature>
 }
 
 export type VerificationLevel = 'zkKYC' | 'Anti-Sybil'
 
 export type LoginMode = 'email' | 'wallet'
 
-export type Theme = 'light' | 'dark'
+export type Theme = 'light' | 'dark' | 'auto'
 
 export type WidgetOptions = {
   accessToken?: string
@@ -111,13 +139,13 @@ export type WidgetOptions = {
    */
   mode?: LoginMode
   /**
-   * Coming soon.
+   * @default 'auto'
    */
   theme?: Theme
   /**
    * Coming soon.
    */
-  primaryColor?: string
+  // primaryColor?: string
   /**
    * In wallet address login mode (``mode`` = ``"wallet"``), whether or not to check the user's wallet address.
    *
@@ -125,9 +153,11 @@ export type WidgetOptions = {
    * @default false
    */
   checkAddress?: boolean
+
+  searchParams?: URLSearchParams
 }
 
-export type ZkMeWidgetMemberIndex = 'appId' | 'name' | 'chainId' | 'accessToken' | 'lv' | 'mode' | 'theme' | 'primaryColor' | 'checkAddress'
+export type ZkMeWidgetMemberIndex = 'appId' | 'name' | 'chainId' | 'accessToken' | 'lv' | 'mode' | 'theme' | 'checkAddress'
 
 export type ZkMeWidgetMember = {
   [k in ZkMeWidgetMemberIndex]: string | undefined
@@ -148,9 +178,11 @@ export declare class ZkMeWidget implements ZkMeWidgetMember {
 
   get theme(): Theme | undefined
 
-  get primaryColor(): string | undefined
+  // get primaryColor(): string | undefined
 
   get checkAddress(): '0' | '1' | undefined
+
+  searchParams?: URLSearchParams
 
   /**
    * @param appId This parameter means the same thing as ``mchNo``.
