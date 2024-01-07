@@ -6,14 +6,14 @@ type ResultBody = {
 }
 
 export async function verifyKYCWithZkMeServices (appId: string, userAccount: string): Promise<boolean> {
-  return fetch('https://nest-api.zk.me/api/grant/check', {
+  return fetch('https://nest-api.zk.me/api/grant/check_v2', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
       appId,
-      walletAddress: userAccount
+      userAccount
     })
   })
     .then(res => {

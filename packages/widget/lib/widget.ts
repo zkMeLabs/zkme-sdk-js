@@ -107,9 +107,9 @@ export class ZkMeWidget implements _ZkMeWidget {
       if (!provider.signMessage)
         throw new Error('The provider must implement "signMessage" when a checksum address is "true".')
     }
-    if (options?.lv === 'zkKYC' && !provider.delegateTransaction && !provider.delegateCosmosTransaction) {
-      throw new Error('You must choose to implement one of the methods "delegateTransaction" and "delegateCosmosTransaction" depending on the type of blockchain your project is running on.')
-    }
+    // if (options?.lv === 'zkKYC' && !provider.delegateTransaction && !provider.delegateCosmosTransaction) {
+    //   throw new Error('You must choose to implement one of the methods "delegateTransaction" and "delegateCosmosTransaction" depending on the type of blockchain your project is running on.')
+    // }
 
     this.#appId = appId
     this.#name = name

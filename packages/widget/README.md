@@ -26,14 +26,28 @@ import { ZkMeWidget, type Provider } from '@zkmelabs/widget'
 
 const provider: Provider = {
   async getAccessToken() {
-    // Request a new token from your backend service and return it to the widget
+    // Request a new token from your backend service and return it to the widget.
+    // For the access token, see https://docs.zk.me/zkme-dochub/zkkyc-compliance-suite/integration-guide/widget-sdk-integration#usage-example
     return fetchNewToken()
   },
+
   async getUserAccounts() {
+    // If your project is a Dapp,
+    // you need to return the user's connected wallet address.
     if (!userConnectedAddress) {
       userConnectedAddress = await connect()
     }
     return [userConnectedAddress]
+
+    // If your project is a Web2 project and the KYC program configured
+    // in the zkMe dashboard does not contain Identity verification,
+    // you can return the user's email address, phone number, or any other unique identifier.
+    //
+    // return ['email address']
+    // or
+    // return ['phone number']
+    // or
+    // return ['unique identifier']
   },
 
   // The following methods implement one of these
@@ -106,7 +120,7 @@ import { verifyKYCWithZkMeServices } from '@zkmelabs/widget'
 
 const results: boolean = await verifyKYCWithZkMeServices(
   appId, // This parameter means the same thing as "mchNo"
-  userAccount // User's wallet address
+  userAccount // Same value as in provider.getUserAccounts
 )
 
 if (!results) {
