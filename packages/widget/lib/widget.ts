@@ -1,4 +1,4 @@
-import type { WidgetOptions, VerificationLevel, LoginMode, Theme, ZkMeWidgetMessageBody, Provider, TransactionRequest, CosmosTransactionRequest, ZkMeWidgetEvent, FinishedHook, ZkMeWidgetMemberIndex, ZkMeWidget as _ZkMeWidget } from '..'
+import type { WidgetOptions, VerificationLevel, LoginMode, Theme, ZkMeWidgetMessageBody, Provider, TransactionRequest, CosmosTransactionRequest, AptosTransactionRequest, ZkMeWidgetEvent, FinishedHook, ZkMeWidgetMemberIndex, ZkMeWidget as _ZkMeWidget, AptosSignMessagePayload, AptosSignature, StdSignature } from '..'
 
 export const ZKME_WIDGET_ORIGIN = import.meta.env.VITE_ZKME_WIDGET_ORIGIN || 'https://widget.zk.me'
 
@@ -44,7 +44,7 @@ export class ZkMeWidget implements _ZkMeWidget {
   #lv?: VerificationLevel
   #mode?: LoginMode
   #theme?: Theme
-  #primaryColor?: string
+  // #primaryColor?: string
   #checkAddress?: boolean
 
   #widgetMask: HTMLDivElement | null = null
@@ -53,6 +53,8 @@ export class ZkMeWidget implements _ZkMeWidget {
   #visibility: boolean = false
   #events = new Map<string, (() => void | FinishedHook)[]>()
   #channelId: string
+
+  searchParams?: URLSearchParams
 
   static #id: number = 0
 
@@ -86,9 +88,9 @@ export class ZkMeWidget implements _ZkMeWidget {
     return this.#theme
   }
 
-  get primaryColor() {
-    return this.#primaryColor
-  }
+  // get primaryColor() {
+  //   return this.#primaryColor
+  // }
 
   get checkAddress() {
     if (this.#checkAddress)
@@ -105,9 +107,9 @@ export class ZkMeWidget implements _ZkMeWidget {
       if (!provider.signMessage)
         throw new Error('The provider must implement "signMessage" when a checksum address is "true".')
     }
-    if (options?.lv === 'zkKYC' && !provider.delegateTransaction && !provider.delegateCosmosTransaction) {
-      throw new Error('You must choose to implement one of the methods "delegateTransaction" and "delegateCosmosTransaction" depending on the type of blockchain your project is running on.')
-    }
+    // if (options?.lv === 'zkKYC' && !provider.delegateTransaction && !provider.delegateCosmosTransaction) {
+    //   throw new Error('You must choose to implement one of the methods "delegateTransaction" and "delegateCosmosTransaction" depending on the type of blockchain your project is running on.')
+    // }
 
     this.#appId = appId
     this.#name = name
@@ -117,9 +119,10 @@ export class ZkMeWidget implements _ZkMeWidget {
     this.#lv = options?.lv
     this.#mode = options?.mode
     this.#theme = options?.theme
-    this.#primaryColor = options?.primaryColor
+    // this.#primaryColor = options?.primaryColor
     this.#checkAddress = options?.checkAddress
     this.#channelId = `${Date.now()}-${ZkMeWidget.#id++}`
+    this.searchParams = options?.searchParams
 
     window.addEventListener('message', this.#listener)
   }
@@ -177,8 +180,11 @@ export class ZkMeWidget implements _ZkMeWidget {
     } else if (method === 'delegateTransaction') {
       try {
         let txHash: string
+
         if (is<CosmosTransactionRequest>(params, 'senderAddress')) {
           txHash = await this.#provider.delegateCosmosTransaction!(params)
+        } else if (is<AptosTransactionRequest>(params, 'function')) {
+          txHash = await this.#provider.delegateAptosTransaction!(params)
         } else {
           txHash = await this.#provider.delegateTransaction!(params as TransactionRequest)
         }
@@ -192,16 +198,22 @@ export class ZkMeWidget implements _ZkMeWidget {
         const accessToken = await this.#provider.getAccessToken()
         handleApprove(accessToken)
       } catch (err: any) {
-        handleReject(err.message)
+        handleReject(err.message || err.msg)
       }
 
     } else if (method === 'signMessage') {
       try {
-        if (!this.#provider.signMessage) {
-          throw new Error('The provider does not implement the "signMessage" method.')
+        let results: string | StdSignature | AptosSignature
+
+        if (typeof params === 'string') {
+          results = await this.#provider.signMessage!(params)
+        } else {
+          if (!this.#provider.signAptosMessage) {
+            throw new Error('The provider does not implement the "signAptosMessage" method.')
+          }
+          results = await this.#provider.signAptosMessage(params as unknown as AptosSignMessagePayload)
         }
-        const signature = await this.#provider.signMessage(params as string)
-        handleApprove(signature)
+        handleApprove(results)
       } catch (err: any) {
         handleReject(err.message)
       }
@@ -214,13 +226,17 @@ export class ZkMeWidget implements _ZkMeWidget {
 
     const url = new URL(ZKME_WIDGET_ORIGIN)
 
-    const params = Array<ZkMeWidgetMemberIndex>('appId', 'name', 'chainId', 'accessToken', 'lv', 'mode', 'theme', 'primaryColor', 'checkAddress')
+    const params = Array<ZkMeWidgetMemberIndex>('appId', 'name', 'chainId', 'accessToken', 'lv', 'mode', 'theme', 'checkAddress')
     params.forEach((p) => {
       const v = this[p]
       v && url.searchParams.append(p, v)
     })
     url.searchParams.append('origin', location.origin)
     url.searchParams.append('channelId', this.#channelId)
+
+    if (this.searchParams) {
+      return url.toString() + '&' + this.searchParams.toString()
+    }
 
     return url.toString()
   }
@@ -235,11 +251,16 @@ export class ZkMeWidget implements _ZkMeWidget {
 
     const maxZIndex = getMaxZIndex()
     const src = this.#generateUrl()
+    const style = {
+      auto: '',
+      light: 'background: #fff',
+      dark: 'background: #141414',
+    }[this.#theme || 'auto']
 
     this.#widgetMask.style.zIndex = `${maxZIndex + 1}`
     this.#widgetMask.innerHTML = `
-      <div class="zkme-widget-wrap">
-        <iframe src="${src}" width="100%" height="100%"></iframe>
+      <div class="zkme-widget-wrap" style="${style}">
+        <iframe allow="camera" src="${src}" width="100%" height="100%"></iframe>
       </div>
     `
     this.#widgetNode = this.#widgetMask.querySelector(`iframe`)

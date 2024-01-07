@@ -1,3 +1,13 @@
+:root {
+  --vt-c-background: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --vt-c-background: #141414;
+  }
+}
+
 .zkme-widget-mask {
   position: absolute;
   top: 0;
@@ -21,7 +31,7 @@
   width: 510px;
   height: 700px;
   border-radius: 20px;
-  background: #fff;
+  background: var(--vt-c-background);
   overflow: hidden;
 }
 
