@@ -39,9 +39,8 @@ const provider: Provider = {
     }
     return [userConnectedAddress]
 
-    // If your project is a Web2 project and the KYC program configured
-    // in the zkMe dashboard does not contain Identity verification,
-    // you can return the user's email address, phone number, or any other unique identifier.
+    // If not,
+    // you should return the user's e-mail address, phone number or any other unique identifier.
     //
     // return ['email address']
     // or

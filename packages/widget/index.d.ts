@@ -94,7 +94,7 @@ export interface Provider {
   /**
    * This method is used to get the user's connected wallet address or unique identifier from you.
    *
-   * If your project is a Dapp, you need to return the user's connected wallet address, if your project is a Web2 project and the KYC program configured in the zkMe dashboard does not contain Identity verification, you can return the user's email address, phone number, or any other unique identifier.
+   * If your project is a Dapp, you need to return the user's connected wallet address, if not, you should return the user's e-mail address, phone number or any other unique identifier.
    */
   getUserAccounts(): Promise<string[]>
   /**

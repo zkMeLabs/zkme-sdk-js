@@ -141,9 +141,14 @@ export class ZkMeWidget implements _ZkMeWidget {
     } = ev.data
 
     if (event === 'finished' && verifiedAddress) {
+      this.hide()
       const callbacks = this.#events.get(event) || []
       callbacks.forEach((cb: FinishedHook) => {
         cb(verifiedAddress, kycResults)
+      })
+      // Clear the dom when the hide animation ends
+      animation(320, undefined, () => {
+        this.#clearDom()
       })
     } else if (event === 'close') {
       this.hide()
@@ -241,6 +246,13 @@ export class ZkMeWidget implements _ZkMeWidget {
     return url.toString()
   }
 
+  #clearDom() {
+    if (this.#widgetMask) {
+      document.body.removeChild(this.#widgetMask)
+      this.#widgetMask = this.#widgetNode = null
+    }
+  }
+
   launch() {
     if (this.#widgetNode) {
       this.show()
@@ -294,6 +306,9 @@ export class ZkMeWidget implements _ZkMeWidget {
   }
 
   show() {
+    if (!this.#widgetNode) {
+      return this.launch()
+    }
     if (this.#visibility)
       return
     this.#visibility = true
@@ -316,9 +331,6 @@ export class ZkMeWidget implements _ZkMeWidget {
 
   destroy() {
     window.removeEventListener('message', this.#listener)
-    if (this.#widgetMask) {
-      document.body.removeChild(this.#widgetMask)
-      this.#widgetMask = this.#widgetNode = null
-    }
+    this.#clearDom()
   }
 }
