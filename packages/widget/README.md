@@ -2,9 +2,8 @@
 
 zkMe zkKYC and Anti-Sybil SDK.
 
-## Getting Started
+## Installation
 
-1. Installation.
 ``` shell
 pnpm add @zkmelabs/widget
 
@@ -15,12 +14,16 @@ yarn add @zkmelabs/widget
 npm install @zkmelabs/widget
 ```
 
-2. Import styles.
+## Getting Started
+
+### Step 1. Import styles
+
 ``` javascript
 import '@zkmelabs/widget/dist/style.css'
 ```
 
-3. Create a new ``ZkMeWidget`` instance.
+### Step 2. Create a new ``ZkMeWidget`` instance
+
 ``` javascript
 import { ZkMeWidget, type Provider } from '@zkmelabs/widget'
 
@@ -49,8 +52,9 @@ const provider: Provider = {
     // return ['unique identifier']
   },
 
-  // The following methods implement one of these
-  // depending on the type of blockchain your project is running on.
+  // According to which blockchain your project is integrated with,
+  // choose and implement the corresponding methods as shown below.
+  // If you are integrating Anti-Sybil(MeID) , you don't need to implement them.
 
   // EVM
   async delegateTransaction(tx) {
@@ -75,35 +79,40 @@ const provider: Provider = {
   // ...
   // See the Provider interface definition for more details on other chains.
 }
+
 const zkMeWidget = new ZkMeWidget(
-  appId,
-  'Your Dapp name',
+  appId, // This parameter means the same thing as "mchNo"
+  'YourDappName',
   chainId,
-  provider
+  provider,
+  // Optional configurations are detailed in the table below
+  options
 )
 ```
 
-4. Launch the zkMe widget and it will be displayed in the center of your webpage.
-``` javascript
-zkMeWidget.launch()
-```
+| Param            | Type               | Description                                             |
+|------------------|--------------------|---------------------------------------------------------|
+| options.lv       | VerificationLevel? | ``"zkKYC"`` or ``"Anti-Sybil"``, default ``"zkKYC"``    |
 
-5. Listen to the ``finished`` widget events to detect when the user has completed the KYC process.
+### Step 3. Listen to the ``finished`` widget events to detect when the user has completed the zkKYC/MeID process.
+
 ``` typescript
-import { verifyKYCWithZkMeServices } from '@zkmelabs/widget'
+import { verifyWithZkMeServices } from '@zkmelabs/widget'
 
-type KycResults = 'matching' | 'mismatch'
-
-function handleFinished(verifiedAddress: string, kycResults: KycResults) {
+function handleFinished(verifiedAccount: string) {
   // We recommend that you double-check this by calling
   // the functions mentioned in the "Helper functions" section.
   if (
-    kycResults === 'matching' &&
-    verifiedAddress === userConnectedAddress
+    verifiedAccount === userConnectedAddress
   ) {
-    const results = await verifyKYCWithZkMeServices(appId, userConnectedAddress)
+    // zkKYC
+    const results = await verifyWithZkMeServices(appId, userConnectedAddress)
+
+    // Anti-Sybil(MeID)
+    // const results = await verifyWithZkMeServices(appId, userConnectedAddress, 'Anti-Sybil')
+
     if (results) {
-      // Prompts the user that KYC verification has been completed
+      // Prompts the user that zkKYC/MeID verification has been completed
     }
   }
 }
@@ -111,21 +120,36 @@ function handleFinished(verifiedAddress: string, kycResults: KycResults) {
 zkMeWidget.on('finished', handleFinished)
 ```
 
+### Step 4. Launch the zkMe widget and it will be displayed in the center of your webpage.
+
+``` javascript
+zkMeWidget.launch()
+```
+
 ## Helper functions
 
-Before launching the widget you should check the KYC status of the user and launch the widget when the check result is ``false``.
+### verifyWithZkMeServices
+
+Before launching the widget you should check the zkKYC/MeID status of the user and launch the widget when the check result is ``false``.
+
+| Param            | Type               | Description                                             |
+|------------------|--------------------|---------------------------------------------------------|
+| appId            | string             | This parameter means the same thing as "mchNo"          |
+| userAccount      | string             | Same value as in ``provider.getUserAccounts``           |
+| lv               | VerificationLevel? | ``"zkKYC"`` or ``"Anti-Sybil"``, default ``"zkKYC"``    |
 
 ``` typescript
-import { verifyKYCWithZkMeServices } from '@zkmelabs/widget'
+import { verifyWithZkMeServices } from '@zkmelabs/widget'
 
-const results: boolean = await verifyKYCWithZkMeServices(
-  appId, // This parameter means the same thing as "mchNo"
-  userAccount // Same value as in provider.getUserAccounts
+const results: boolean = await verifyWithZkMeServices(
+  appId,
+  userAccount
 )
 
 if (!results) {
   zkMeWidget.launch()
 }
-
 ```
-You can also get a way to query a user's KYC status from a Smart Contract [here](https://github.com/zkMeLabs/zkme-sdk-js/tree/main/packages/verify-abi#readme).
+
+You can also get a way to query a user's zkKYC status from a Smart Contract [here](https://github.com/zkMeLabs/zkme-sdk-js/tree/main/packages/verify-abi#readme).
+

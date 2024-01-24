@@ -1,15 +1,26 @@
 /**
  * Verify that the user passes your KYC requirements.
  *
+ * @deprecated since version 1.2.0, please use ``verifyWithZkMeServices`` instead.
  * @param appId This parameter means the same thing as ``mchNo``.
- * @param userAccount User's wallet address.
+ * @param userAccount Same value as in provider.getUserAccounts.
  */
 export declare function verifyKYCWithZkMeServices(appId: string, userAccount: string): Promise<boolean>
+
+/**
+ * Verify the user's KYC/MeID status.
+ *
+ * @param appId This parameter means the same thing as ``mchNo``.
+ * @param userAccount Same value as in provider.getUserAccounts.
+ * @param lv ``"zkKYC"`` or ``"Anti-Sybil"``, default ``"zkKYC"``
+ */
+export declare function verifyWithZkMeServices(appId: string, userAccount: string, lv?: VerificationLevel): Promise<boolean>
 
 export type KycResults = 'matching' | 'mismatch'
 
 export type TransactionRequest = {
   type: null | number
+  from: string
   to: string
   data: string
   /**
@@ -75,7 +86,7 @@ export type AptosSignature = {
 
 export type ZkMeWidgetEvent = 'close' | 'finished'
 
-export type FinishedHook = (verifiedAddress: string, kycResults?: KycResults) => void
+export type FinishedHook = (verifiedAccount: string, kycResults?: KycResults) => void
 
 export type ZkMeWidgetMessageBody = {
   id?: string

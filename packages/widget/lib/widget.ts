@@ -291,7 +291,7 @@ export class ZkMeWidget implements _ZkMeWidget {
     this.#chainId = chainId
     if (this.#widgetNode) {
       this.#widgetNode.src = this.#generateUrl()
-      this.show()
+      // this.show()
     }
   }
 
