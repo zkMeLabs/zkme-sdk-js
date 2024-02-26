@@ -40,6 +40,7 @@ export class ZkMeWidget implements _ZkMeWidget {
   #name: string
   #chainId: string
   #provider: Provider
+  #endpoint?: string
   #accessToken?: string
   #lv?: VerificationLevel
   #mode?: LoginMode
@@ -68,6 +69,10 @@ export class ZkMeWidget implements _ZkMeWidget {
 
   get chainId() {
     return this.#chainId
+  }
+
+  get endpoint() {
+    return this.#endpoint
   }
 
   get accessToken() {
@@ -115,6 +120,7 @@ export class ZkMeWidget implements _ZkMeWidget {
     this.#name = name
     this.#chainId = chainId
     this.#provider = provider
+    this.#endpoint = options?.endpoint
     this.#accessToken = options?.accessToken
     this.#lv = options?.lv
     this.#mode = options?.mode
@@ -128,7 +134,10 @@ export class ZkMeWidget implements _ZkMeWidget {
   }
 
   #listener = async (ev: MessageEvent<ZkMeWidgetMessageBody>) => {
-    if (ev.origin !== ZKME_WIDGET_ORIGIN || this.#channelId !== ev.data.channelId) {
+    if (
+      ev.origin !== (this.endpoint || ZKME_WIDGET_ORIGIN) ||
+      this.#channelId !== ev.data.channelId
+    ) {
       return
     }
     const {
@@ -229,7 +238,7 @@ export class ZkMeWidget implements _ZkMeWidget {
     if (accessToken)
       this.#accessToken = accessToken
 
-    const url = new URL(ZKME_WIDGET_ORIGIN)
+    const url = new URL(this.#endpoint || ZKME_WIDGET_ORIGIN)
 
     const params = Array<ZkMeWidgetMemberIndex>('appId', 'name', 'chainId', 'accessToken', 'lv', 'mode', 'theme', 'checkAddress')
     params.forEach((p) => {

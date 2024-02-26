@@ -54,7 +54,7 @@ const provider: Provider = {
 
   // According to which blockchain your project is integrated with,
   // choose and implement the corresponding methods as shown below.
-  // If you are integrating Anti-Sybil(MeID) , you don't need to implement them.
+  // If you are integrating Anti-Sybil(MeID) or Simple zkKYC, you don't need to implement them.
 
   // EVM
   async delegateTransaction(tx) {
@@ -128,15 +128,9 @@ zkMeWidget.launch()
 
 ## Helper functions
 
-### verifyWithZkMeServices
+### verifyWithZkMeServices()
 
 Before launching the widget you should check the zkKYC/MeID status of the user and launch the widget when the check result is ``false``.
-
-| Param            | Type               | Description                                             |
-|------------------|--------------------|---------------------------------------------------------|
-| appId            | string             | This parameter means the same thing as "mchNo"          |
-| userAccount      | string             | Same value as in ``provider.getUserAccounts``           |
-| lv               | VerificationLevel? | ``"zkKYC"`` or ``"Anti-Sybil"``, default ``"zkKYC"``    |
 
 ``` typescript
 import { verifyWithZkMeServices } from '@zkmelabs/widget'
@@ -151,5 +145,60 @@ if (!results) {
 }
 ```
 
+| Param            | Type               | Description                                             |
+|------------------|--------------------|---------------------------------------------------------|
+| appId            | string             | This parameter means the same thing as "mchNo"          |
+| userAccount      | string             | Same value as in ``provider.getUserAccounts``           |
+| lv               | VerificationLevel? | ``"zkKYC"`` or ``"Anti-Sybil"``, default ``"zkKYC"``    |
+
 You can also get a way to query a user's zkKYC status from a Smart Contract [here](https://github.com/zkMeLabs/zkme-sdk-js/tree/main/packages/verify-abi#readme).
 
+## ZkMeWidget instance methods
+
+### launch()
+
+Launch the zkMe widget and it will be displayed in the center of your webpage.
+
+``` typescript
+launch(): void
+```
+
+### on()
+
+Listen to zkMe widget events.
+
+``` typescript
+on(event: 'finished', callback: FinishedHook): void
+on(event: 'close', callback: () => void): void
+
+type FinishedHook = (verifiedAccount: string, kycResults?: KycResults) => void
+type KycResults = 'matching' | 'mismatch'
+```
+
+### switchChain()
+
+If your Dapp integrates multiple chains, use this method to synchronize the new chain to the zkMe widget when the user switches chains in your Dapp.
+
+``` typescript
+switchChain(chainId: string): void
+```
+
+| Param            | Type               | Description                                             |
+|------------------|--------------------|---------------------------------------------------------|
+| chainId          | string             | String in hex format, e.g. ``"0x89"``                   |
+
+### hide()
+
+Hide the zkMe widget.
+
+``` typescript
+hide(): void
+```
+
+### destroy()
+
+Remove the message event listener registered by the zkMe widget from the window and destroy the DOM node.
+
+``` typescript
+destroy(): void
+```

@@ -141,6 +141,7 @@ export type LoginMode = 'email' | 'wallet'
 export type Theme = 'light' | 'dark' | 'auto'
 
 export type WidgetOptions = {
+  endpoint?: string
   accessToken?: string
   /**
    * @default 'zkKYC'
@@ -182,6 +183,8 @@ export declare class ZkMeWidget implements ZkMeWidgetMember {
   get name(): string
 
   get chainId(): string
+
+  get endpoint(): string | undefined
 
   get accessToken(): string | undefined
 
