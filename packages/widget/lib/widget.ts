@@ -23,7 +23,7 @@ function animation(time: number, startCb?: () => void, doneCb?: () => void) {
       start = timestamp
     }
     deta = timestamp - start
-    if (deta < 1) {
+    if (deta > 0) {
       startCb && startCb()
     }
     if (deta <= time) {
@@ -48,12 +48,15 @@ export class ZkMeWidget implements _ZkMeWidget {
   // #primaryColor?: string
   #checkAddress?: boolean
 
-  #widgetMask: HTMLDivElement | null = null
+  #widgetMask: HTMLElement | null = null
   #widgetNode: HTMLIFrameElement | null = null
+  #customContainer?: string | HTMLElement
 
   #visibility: boolean = false
   #events = new Map<string, (() => void | FinishedHook)[]>()
   #channelId: string
+
+  #isDestroyed = false
 
   searchParams?: URLSearchParams
 
@@ -128,6 +131,7 @@ export class ZkMeWidget implements _ZkMeWidget {
     // this.#primaryColor = options?.primaryColor
     this.#checkAddress = options?.checkAddress
     this.#channelId = `${Date.now()}-${ZkMeWidget.#id++}`
+    this.#customContainer = options?.rootContainer
     this.searchParams = options?.searchParams
 
     window.addEventListener('message', this.#listener)
@@ -257,8 +261,23 @@ export class ZkMeWidget implements _ZkMeWidget {
 
   #clearDom() {
     if (this.#widgetMask) {
-      document.body.removeChild(this.#widgetMask)
+      this.#widgetMask.remove()
       this.#widgetMask = this.#widgetNode = null
+      this.#visibility = false
+    }
+  }
+
+  #getRootContainer() {
+    if (this.#customContainer) {
+      if (typeof this.#customContainer === 'string') {
+        const nd = document.querySelector<HTMLElement>(this.#customContainer)
+        if (!nd) {
+          throw new Error('Invalid root container.')
+        }
+        return nd
+      } else {
+        return this.#customContainer
+      }
     }
   }
 
@@ -267,25 +286,39 @@ export class ZkMeWidget implements _ZkMeWidget {
       this.show()
       return
     }
-    this.#widgetMask = document.createElement('div')
-    this.#widgetMask.classList.add('zkme-widget-mask', 'zkme-fl-central')
+    if (this.#isDestroyed) {
+      window.addEventListener('message', this.#listener)
+    }
 
-    const maxZIndex = getMaxZIndex()
+    const container = this.#getRootContainer() || document.body
+
+    this.#widgetMask = document.createElement('div')
+    this.#widgetMask.classList.add('zkme-transition')
+
+    if (!this.#customContainer) {
+      const maxZIndex = getMaxZIndex()
+      this.#widgetMask.classList.add('zkme-widget-mask')
+      this.#widgetMask.style.zIndex = `${maxZIndex + 1}`
+    }
+
     const src = this.#generateUrl()
-    const style = {
+    let style = {
       auto: '',
       light: 'background: #fff',
       dark: 'background: #141414',
     }[this.#theme || 'auto']
 
-    this.#widgetMask.style.zIndex = `${maxZIndex + 1}`
+    if (this.#customContainer) {
+      style += '; width: auto; max-width: 510px'
+    }
+
     this.#widgetMask.innerHTML = `
       <div class="zkme-widget-wrap" style="${style}">
         <iframe allow="camera" src="${src}" width="100%" height="100%"></iframe>
       </div>
     `
     this.#widgetNode = this.#widgetMask.querySelector(`iframe`)
-    document.body.appendChild(this.#widgetMask)
+    container.appendChild(this.#widgetMask)
     this.show()
   }
 
@@ -321,7 +354,8 @@ export class ZkMeWidget implements _ZkMeWidget {
     if (this.#visibility)
       return
     this.#visibility = true
-    this.#widgetMask && (this.#widgetMask.style.display = 'flex')
+    const display = this.#customContainer ? 'block' : 'flex'
+    this.#widgetMask && (this.#widgetMask.style.display = display)
     animation(300, () => {
       this.#widgetMask?.classList.add('zkme-fade')
     })
@@ -341,5 +375,6 @@ export class ZkMeWidget implements _ZkMeWidget {
   destroy() {
     window.removeEventListener('message', this.#listener)
     this.#clearDom()
+    this.#isDestroyed = true
   }
 }

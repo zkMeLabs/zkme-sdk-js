@@ -168,6 +168,8 @@ export type WidgetOptions = {
    */
   checkAddress?: boolean
 
+  rootContainer?: string | HTMLElement
+
   searchParams?: URLSearchParams
 }
 

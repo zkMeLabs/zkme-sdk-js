@@ -30,7 +30,7 @@ import { ZkMeWidget, type Provider } from '@zkmelabs/widget'
 const provider: Provider = {
   async getAccessToken() {
     // Request a new token from your backend service and return it to the widget.
-    // For the access token, see https://docs.zk.me/zkme-dochub/zkkyc-compliance-suite/integration-guide/widget-sdk-integration#usage-example
+    // For the access token, see https://docs.zk.me/zkme-dochub/zkkyc-compliance-suite/zkkyc-integration-guide/sdk-integration#exchanging-api_key-for-access-token
     return fetchNewToken()
   },
 
@@ -54,7 +54,7 @@ const provider: Provider = {
 
   // According to which blockchain your project is integrated with,
   // choose and implement the corresponding methods as shown below.
-  // If you are integrating Anti-Sybil(MeID) or Simple zkKYC, you don't need to implement them.
+  // If you are integrating Anti-Sybil(MeID) or Cross-chain zkKYC, you don't need to implement them.
 
   // EVM
   async delegateTransaction(tx) {
@@ -168,11 +168,11 @@ launch(): void
 Listen to zkMe widget events.
 
 ``` typescript
-on(event: 'finished', callback: FinishedHook): void
-on(event: 'close', callback: () => void): void
+on(event: 'finished', callback: FinishedHook): void;
+on(event: 'close', callback: () => void): void;
 
-type FinishedHook = (verifiedAccount: string, kycResults?: KycResults) => void
-type KycResults = 'matching' | 'mismatch'
+type FinishedHook = (verifiedAccount: string, kycResults?: KycResults) => void;
+type KycResults = 'matching' | 'mismatch';
 ```
 
 ### switchChain()
