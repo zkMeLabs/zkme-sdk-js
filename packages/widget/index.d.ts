@@ -12,9 +12,10 @@ export declare function verifyKYCWithZkMeServices(appId: string, userAccount: st
  *
  * @param appId This parameter means the same thing as ``mchNo``.
  * @param userAccount Same value as in provider.getUserAccounts.
+ * @param programNo The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC).
  * @param lv ``"zkKYC"`` or ``"Anti-Sybil"``, default ``"zkKYC"``
  */
-export declare function verifyWithZkMeServices(appId: string, userAccount: string, lv?: VerificationLevel): Promise<boolean>
+export declare function verifyWithZkMeServices(appId: string, userAccount: string, programNo?: string | number, lv?: VerificationLevel): Promise<boolean>
 
 export type KycResults = 'matching' | 'mismatch'
 
@@ -84,7 +85,7 @@ export type AptosSignature = {
   fullMessage: string
 }
 
-export type ZkMeWidgetEvent = 'close' | 'finished'
+export type ZkMeWidgetEvent = 'prepared' | 'close' | 'finished'
 
 export type FinishedHook = (verifiedAccount: string, kycResults?: KycResults) => void
 
@@ -141,6 +142,7 @@ export type LoginMode = 'email' | 'wallet'
 export type Theme = 'light' | 'dark' | 'auto'
 
 export type WidgetOptions = {
+  programNo?: string | number
   endpoint?: string
   accessToken?: string
   /**
@@ -173,10 +175,10 @@ export type WidgetOptions = {
   searchParams?: URLSearchParams
 }
 
-export type ZkMeWidgetMemberIndex = 'appId' | 'name' | 'chainId' | 'accessToken' | 'lv' | 'mode' | 'theme' | 'checkAddress'
+export type ZkMeWidgetMemberIndex = 'appId' | 'name' | 'chainId' | 'programNo' | 'accessToken' | 'lv' | 'mode' | 'theme' | 'checkAddress'
 
 export type ZkMeWidgetMember = {
-  [k in ZkMeWidgetMemberIndex]: string | undefined
+  [k in ZkMeWidgetMemberIndex]: string | number | undefined
 }
 
 export declare class ZkMeWidget implements ZkMeWidgetMember {
@@ -185,6 +187,8 @@ export declare class ZkMeWidget implements ZkMeWidgetMember {
   get name(): string
 
   get chainId(): string
+
+  get programNo(): string | number | undefined
 
   get endpoint(): string | undefined
 

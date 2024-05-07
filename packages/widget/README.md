@@ -37,9 +37,7 @@ const provider: Provider = {
   async getUserAccounts() {
     // If your project is a Dapp,
     // you need to return the user's connected wallet address.
-    if (!userConnectedAddress) {
-      userConnectedAddress = await connect()
-    }
+    const userConnectedAddress = await connect()
     return [userConnectedAddress]
 
     // If not,
@@ -90,9 +88,11 @@ const zkMeWidget = new ZkMeWidget(
 )
 ```
 
-| Param            | Type               | Description                                             |
-|------------------|--------------------|---------------------------------------------------------|
-| options.lv       | VerificationLevel? | ``"zkKYC"`` or ``"Anti-Sybil"``, default ``"zkKYC"``    |
+| Param             | Type               | Description |
+|-------------------|--------------------|------------------------------------------------------|
+| options.lv        | VerificationLevel? | ``"zkKYC"`` or ``"Anti-Sybil"``, default ``"zkKYC"`` |
+| options.programNo | string?            | The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). |
+| options.theme     | Theme?             | ``"auto"``, ``"light"`` or ``"dark"``, default ``"auto"``. This option must match the settings in the dashboard system (dashboard.zk.me - Integration - UI Design - Set your color mode). |
 
 ### Step 3. Listen to the ``finished`` widget events to detect when the user has completed the zkKYC/MeID process.
 

@@ -34,13 +34,15 @@ export async function verifyKYCWithZkMeServices (appId: string, userAccount: str
     })
 }
 
-export async function verifyWithZkMeServices (appId: string, userAccount: string, lv: 'zkKYC' | 'Anti-Sybil' = 'zkKYC'): Promise<boolean> {
+export async function verifyWithZkMeServices (appId: string, userAccount: string, programNo?: string | number, lv: 'zkKYC' | 'Anti-Sybil' = 'zkKYC'): Promise<boolean> {
   const API_URL = lv === 'Anti-Sybil'
     ? 'https://popupapi.zk.me/appUserGrantMch/queryBindingMeId'
     : 'https://nest-api.zk.me/api/grant/check_v2'
   const data = {
-    [lv === 'Anti-Sybil' ? 'mchNo' : 'appId']: appId,
-    userAccount
+    userAccount,
+    ...(
+      lv === 'Anti-Sybil' ? { mchNo: appId } : { programNo, appId }
+    )
   }
 
   return fetch(API_URL, {

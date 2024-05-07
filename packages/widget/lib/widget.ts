@@ -40,6 +40,7 @@ export class ZkMeWidget implements _ZkMeWidget {
   #name: string
   #chainId: string
   #provider: Provider
+  #programNo?: string | number
   #endpoint?: string
   #accessToken?: string
   #lv?: VerificationLevel
@@ -50,6 +51,7 @@ export class ZkMeWidget implements _ZkMeWidget {
 
   #widgetMask: HTMLElement | null = null
   #widgetNode: HTMLIFrameElement | null = null
+  #loadingNode: HTMLElement | null = null
   #customContainer?: string | HTMLElement
 
   #visibility: boolean = false
@@ -72,6 +74,10 @@ export class ZkMeWidget implements _ZkMeWidget {
 
   get chainId() {
     return this.#chainId
+  }
+
+  get programNo() {
+    return this.#programNo
   }
 
   get endpoint() {
@@ -123,6 +129,7 @@ export class ZkMeWidget implements _ZkMeWidget {
     this.#name = name
     this.#chainId = chainId
     this.#provider = provider
+    this.#programNo = options?.programNo
     this.#endpoint = options?.endpoint
     this.#accessToken = options?.accessToken
     this.#lv = options?.lv
@@ -153,7 +160,12 @@ export class ZkMeWidget implements _ZkMeWidget {
       event
     } = ev.data
 
-    if (event === 'finished' && verifiedAddress) {
+    if (event === 'prepared') {
+      this.#loadingNode?.classList.add('hide')
+      animation(300, undefined, () => {
+        this.#loadingNode?.remove()
+      })
+    } else if (event === 'finished' && verifiedAddress) {
       this.hide()
       const callbacks = this.#events.get(event) || []
       callbacks.forEach((cb: FinishedHook) => {
@@ -244,10 +256,10 @@ export class ZkMeWidget implements _ZkMeWidget {
 
     const url = new URL(this.#endpoint || ZKME_WIDGET_ORIGIN)
 
-    const params = Array<ZkMeWidgetMemberIndex>('appId', 'name', 'chainId', 'accessToken', 'lv', 'mode', 'theme', 'checkAddress')
+    const params = Array<ZkMeWidgetMemberIndex>('appId', 'name', 'chainId', 'programNo', 'accessToken', 'lv', 'mode', 'theme', 'checkAddress')
     params.forEach((p) => {
       const v = this[p]
-      v && url.searchParams.append(p, v)
+      v && url.searchParams.append(p, String(v))
     })
     url.searchParams.append('origin', location.origin)
     url.searchParams.append('channelId', this.#channelId)
@@ -302,22 +314,37 @@ export class ZkMeWidget implements _ZkMeWidget {
     }
 
     const src = this.#generateUrl()
-    let style = {
-      auto: '',
-      light: 'background: #fff',
-      dark: 'background: #141414',
-    }[this.#theme || 'auto']
+    let wrapStyle = ''
 
     if (this.#customContainer) {
-      style += '; width: auto; max-width: 510px'
+      wrapStyle += '; width: auto; max-width: 510px'
+    }
+
+    if (this.#theme && this.#theme !== 'auto') {
+      const cssVar = {
+        light: { background: '#fff', txt: '#005563' },
+        dark: { background: '#141414', txt: '#fff' },
+      }[this.#theme]
+      const docEl = document.documentElement
+      docEl.style.setProperty('--zkme-c-background', cssVar.background)
+      docEl.style.setProperty('--zkme-c-txt', cssVar.txt)
     }
 
     this.#widgetMask.innerHTML = `
-      <div class="zkme-widget-wrap" style="${style}">
+      <div class="zkme-widget-wrap" style="${wrapStyle}">
+        <div class="zkme-loading">
+          <div class="left-cylinder">
+            <div class="left-point"></div>
+          </div>
+          <div class="right-cylinder">
+            <div class="right-point"></div>
+          </div>
+        </div>
         <iframe allow="camera" src="${src}" width="100%" height="100%"></iframe>
       </div>
     `
-    this.#widgetNode = this.#widgetMask.querySelector(`iframe`)
+    this.#widgetNode = this.#widgetMask.querySelector('iframe')
+    this.#loadingNode = this.#widgetMask.querySelector('.zkme-loading')
     container.appendChild(this.#widgetMask)
     this.show()
   }

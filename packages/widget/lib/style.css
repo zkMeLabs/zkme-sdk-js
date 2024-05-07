@@ -1,27 +1,29 @@
 :root {
-  --vt-c-background: #fff;
+  --zkme-c-background: #fff;
+  --zkme-c-txt: #005563;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --vt-c-background: #141414;
+    --zkme-c-background: #141414;
+    --zkme-c-txt: #fff;
   }
 }
 
 .zkme-widget-mask {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100%;
   background: rgba(18, 20, 29, 0.66);
   z-index: 10;
 }
 
 .zkme-transition {
   display: none;
+  height: 100%;
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
 }
@@ -31,10 +33,12 @@
 }
 
 .zkme-widget-wrap {
+  position: relative;
   width: 510px;
-  height: 700px;
+  height: 100%;
+  max-height: 700px;
   border-radius: 20px;
-  background: var(--vt-c-background);
+  background: var(--zkme-c-background);
   overflow: hidden;
 }
 
@@ -44,10 +48,72 @@
   padding: 0;
 }
 
+.zkme-loading {
+  display: flex;
+  align-items: center;
+  width: 30px;
+  height: 40px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -20px 0 0 -10px;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+.zkme-loading.hide {
+  opacity: 0;
+}
+.zkme-loading .left-cylinder,
+.zkme-loading .right-cylinder{
+  width: 13px;
+  height: 40px;
+  border-radius: 13px;
+  position: relative;
+  background-color: var(--zkme-c-txt);
+}
+.zkme-loading .right-cylinder {
+  margin-left: 4px;
+}
+.zkme-loading .left-point,
+.zkme-loading .right-point {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 4px solid var(--zkme-c-background);
+  margin-left: -4px;
+  box-sizing: content-box;
+}
+.zkme-loading .left-point {
+  transform: translate3d(0, -4px, 0);
+  animation: cylinderAnimationOne 1.68s cubic-bezier(0.8, 0, 0.2, 1) infinite alternate;
+}
+.zkme-loading .right-point {
+  transform: translate3d(0, 23px, 0);
+  animation: cylinderAnimationTwo 1.68s cubic-bezier(0.8, 0, 0.2, 1) infinite alternate;
+}
+
+@keyframes cylinderAnimationOne {
+  0%, 100% {
+    transform: translate3d(0, -4px, 0);
+  }
+  50% {
+    transform: translate3d(0, 23px,0);
+  }
+}
+
+@keyframes cylinderAnimationTwo {
+  0%, 100% {
+    transform: translate3d(0, 23px, 0);
+  }
+  50% {
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
 @media screen and (max-width: 510px) {
   .zkme-widget-wrap {
     width: 100%;
-    height: 100%;
+    max-height: none;
     border-radius: 0;
   }
 }
