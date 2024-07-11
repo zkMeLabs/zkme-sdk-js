@@ -1,4 +1,5 @@
-import type { WidgetOptions, VerificationLevel, LoginMode, Theme, ZkMeWidgetMessageBody, Provider, TransactionRequest, CosmosTransactionRequest, AptosTransactionRequest, ZkMeWidgetEvent, FinishedHook, ZkMeWidgetMemberIndex, ZkMeWidget as _ZkMeWidget, AptosSignMessagePayload, AptosSignature, StdSignature } from '..'
+import type { WidgetOptions, VerificationLevel, LoginMode, Theme, ZkMeWidgetMessageBody, Provider, TransactionRequest, CosmosTransactionRequest, AptosTransactionRequest, ZkMeWidgetEvent, KycFinishedHook, MeidFinishedHook, ZkMeWidgetMemberIndex, ZkMeWidget as _ZkMeWidget, AptosSignMessagePayload, AptosSignature, StdSignature, FinishedHook } from '..'
+import { verifyKycWithZkMeServices, verifyMeidWithZkMeServices } from './verify';
 
 export const ZKME_WIDGET_ORIGIN = import.meta.env.VITE_ZKME_WIDGET_ORIGIN || 'https://widget.zk.me'
 
@@ -35,13 +36,29 @@ function animation(time: number, startCb?: () => void, doneCb?: () => void) {
   window.requestAnimationFrame(step)
 }
 
+function formatErrorMessage(error: any): string {
+  try {
+    const r = JSON.stringify(error)
+    if (r !== '{}') {
+      return r
+    }
+  } catch {
+    //
+  }
+  return error?.message || 'Unknown error'
+}
+
 export class ZkMeWidget implements _ZkMeWidget {
   #appId: string
   #name: string
   #chainId: string
   #provider: Provider
-  #programNo?: string | number
+  #programNo?: string
+
   #endpoint?: string
+  #kycApiEndpoint?: string
+  #meidApiEndpoint?: string
+
   #accessToken?: string
   #lv?: VerificationLevel
   #mode?: LoginMode
@@ -55,7 +72,7 @@ export class ZkMeWidget implements _ZkMeWidget {
   #customContainer?: string | HTMLElement
 
   #visibility: boolean = false
-  #events = new Map<string, (() => void | FinishedHook)[]>()
+  #events = new Map<string, (() => void | FinishedHook | KycFinishedHook | MeidFinishedHook)[]>()
   #channelId: string
 
   #isDestroyed = false
@@ -89,13 +106,11 @@ export class ZkMeWidget implements _ZkMeWidget {
   }
 
   get lv() {
-    if (this.#lv === 'zkKYC') return '1'
-    if (this.#lv === 'Anti-Sybil') return '2'
+    return this.#lv === 'MeID' ? '2' : '1'
   }
 
   get mode() {
-    if (this.#mode === 'email') return '0'
-    if (this.#mode === 'wallet') return '1'
+    return this.#mode === 'wallet' ? '1' : '0'
   }
 
   get theme() {
@@ -113,7 +128,7 @@ export class ZkMeWidget implements _ZkMeWidget {
 
   constructor(appId: string, name: string, chainId: string, provider: Provider, options?: WidgetOptions) {
     if (options?.mode === 'wallet' && options?.lv === 'zkKYC') {
-      throw new Error('Wallet login mode only available with lv="Anti-Sybil".')
+      throw new Error('Wallet login mode only available with lv="MeID".')
     }
     if (options?.checkAddress) {
       if (options?.mode === 'email')
@@ -131,6 +146,8 @@ export class ZkMeWidget implements _ZkMeWidget {
     this.#provider = provider
     this.#programNo = options?.programNo
     this.#endpoint = options?.endpoint
+    this.#kycApiEndpoint = options?.kycApiEndpoint
+    this.#meidApiEndpoint = options?.meidApiEndpoint
     this.#accessToken = options?.accessToken
     this.#lv = options?.lv
     this.#mode = options?.mode
@@ -155,8 +172,8 @@ export class ZkMeWidget implements _ZkMeWidget {
       id,
       method,
       params,
-      kycResults,
       verifiedAddress,
+      programNo,
       event
     } = ev.data
 
@@ -166,11 +183,36 @@ export class ZkMeWidget implements _ZkMeWidget {
         this.#loadingNode?.remove()
       })
     } else if (event === 'finished' && verifiedAddress) {
+      let results: any
+      let callbacks: KycFinishedHook[] | MeidFinishedHook[]
+
+      if (this.#lv === 'MeID') {
+        results = await this.verifyMeidWithZkMeServices(verifiedAddress)
+        results.associatedAccount = verifiedAddress
+        callbacks = this.#events.get('meidFinished') || []
+      } else {
+        results = await this.verifyKycWithZkMeServices(verifiedAddress, programNo)
+        results = {
+          status: results.isGrant ? 'matching' : 'mismatch',
+          associatedAccount: verifiedAddress,
+          programNo,
+          ...results
+        }
+        callbacks = this.#events.get('kycFinished') || []
+      }
+
       this.hide()
-      const callbacks = this.#events.get(event) || []
-      callbacks.forEach((cb: FinishedHook) => {
-        cb(verifiedAddress, kycResults)
+      callbacks.forEach((cb) => {
+        cb(results)
       })
+
+      // ----deprecated since version 0.3.0----
+      const finishedCallbacks = this.#events.get('finished') || []
+      finishedCallbacks.forEach((cb: FinishedHook) => {
+        cb(verifiedAddress, results.status)
+      })
+      // ----deprecated since version 0.3.0----
+
       // Clear the dom when the hide animation ends
       animation(320, undefined, () => {
         this.#clearDom()
@@ -204,7 +246,7 @@ export class ZkMeWidget implements _ZkMeWidget {
         const accounts = await this.#provider.getUserAccounts()
         handleApprove(accounts)
       } catch (err: any) {
-        handleReject(err.message)
+        handleReject(formatErrorMessage(err))
       }
 
     } else if (method === 'delegateTransaction') {
@@ -220,7 +262,7 @@ export class ZkMeWidget implements _ZkMeWidget {
         }
         handleApprove(txHash)
       } catch (err: any) {
-        handleReject(err.message)
+        handleReject(formatErrorMessage(err))
       }
 
     } else if (method === 'getAccessToken') {
@@ -228,7 +270,7 @@ export class ZkMeWidget implements _ZkMeWidget {
         const accessToken = await this.#provider.getAccessToken()
         handleApprove(accessToken)
       } catch (err: any) {
-        handleReject(err.message || err.msg)
+        handleReject(formatErrorMessage(err))
       }
 
     } else if (method === 'signMessage') {
@@ -245,7 +287,7 @@ export class ZkMeWidget implements _ZkMeWidget {
         }
         handleApprove(results)
       } catch (err: any) {
-        handleReject(err.message)
+        handleReject(formatErrorMessage(err))
       }
     }
   }
@@ -263,6 +305,9 @@ export class ZkMeWidget implements _ZkMeWidget {
     })
     url.searchParams.append('origin', location.origin)
     url.searchParams.append('channelId', this.#channelId)
+    if (this.#customContainer) {
+      url.searchParams.append('isCustomContainer', '1')
+    }
 
     if (this.searchParams) {
       return url.toString() + '&' + this.searchParams.toString()
@@ -389,6 +434,8 @@ export class ZkMeWidget implements _ZkMeWidget {
   }
 
   on(event: 'finished', callback: FinishedHook): void
+  on(event: 'kycFinished', callback: KycFinishedHook): void
+  on(event: 'meidFinished', callback: MeidFinishedHook): void
   on(event: 'close', callback: () => void): void
   on(event: ZkMeWidgetEvent, callback: any) {
     const callbacks = this.#events.get(event)
@@ -403,5 +450,18 @@ export class ZkMeWidget implements _ZkMeWidget {
     window.removeEventListener('message', this.#listener)
     this.#clearDom()
     this.#isDestroyed = true
+  }
+
+  verifyKycWithZkMeServices(userAccount: string, programNo?: string) {
+    return verifyKycWithZkMeServices(this.appId, userAccount, {
+      programNo: programNo || this.#programNo,
+      endpoint: this.#kycApiEndpoint
+    })
+  }
+
+  verifyMeidWithZkMeServices(userAccount: string) {
+    return verifyMeidWithZkMeServices(this.appId, userAccount, {
+      endpoint: this.#meidApiEndpoint
+    })
   }
 }

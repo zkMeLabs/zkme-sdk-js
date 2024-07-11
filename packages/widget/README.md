@@ -90,66 +90,68 @@ const zkMeWidget = new ZkMeWidget(
 
 | Param             | Type               | Description |
 |-------------------|--------------------|------------------------------------------------------|
-| options.lv        | VerificationLevel? | ``"zkKYC"`` or ``"Anti-Sybil"``, default ``"zkKYC"`` |
-| options.programNo | string?            | The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). |
+| options.lv        | VerificationLevel? | ``"zkKYC"`` or ``"MeID"``, default ``"zkKYC"`` |
+| options.programNo | string?            | The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). If this parameter is not provided, the SDK will use the earliest program you configured in the dashboard as the default value. |
 | options.theme     | Theme?             | ``"auto"``, ``"light"`` or ``"dark"``, default ``"auto"``. This option must match the settings in the dashboard system (dashboard.zk.me - Integration - UI Design - Set your color mode). |
 
-### Step 3. Listen to the ``finished`` widget events to detect when the user has completed the zkKYC/MeID process.
+### Step 3. Listen to the ``kycFinished``/``meidFinished`` widget events to detect when the user has completed the zkKYC/MeID process.
+
+#### zkKYC
 
 ``` typescript
-import { verifyWithZkMeServices } from '@zkmelabs/widget'
+async function handleFinished(results) {
+  const { isGrant, associatedAccount } = results
 
-function handleFinished(verifiedAccount: string) {
-  // We recommend that you double-check this by calling
-  // the functions mentioned in the "Helper functions" section.
   if (
-    verifiedAccount === userConnectedAddress
+    isGrant &&
+    associatedAccount === userConnectedAddress.toLowerCase()
   ) {
-    // zkKYC
-    const results = await verifyWithZkMeServices(appId, userConnectedAddress)
-
-    // Anti-Sybil(MeID)
-    // const results = await verifyWithZkMeServices(appId, userConnectedAddress, 'Anti-Sybil')
-
-    if (results) {
-      // Prompts the user that zkKYC/MeID verification has been completed
-    }
+    // Prompts the user that zkKYC verification has been completed
   }
 }
 
-zkMeWidget.on('finished', handleFinished)
+zkMeWidget.on('kycFinished', handleFinished)
+```
+
+#### MeID
+
+``` typescript
+zkMeWidget.on('meidFinished', handleFinished)
 ```
 
 ### Step 4. Launch the zkMe widget and it will be displayed in the center of your webpage.
 
 ``` javascript
-zkMeWidget.launch()
+// Button on your page
+button.addEventListener('click', () => {
+  zkMeWidget.launch()
+})
 ```
 
 ## Helper functions
 
-### verifyWithZkMeServices()
+- verifyKycWithZkMeServices()
+- verifyMeidWithZkMeServices()
 
 Before launching the widget you should check the zkKYC/MeID status of the user and launch the widget when the check result is ``false``.
 
 ``` typescript
-import { verifyWithZkMeServices } from '@zkmelabs/widget'
+import { verifyKycWithZkMeServices } from '@zkmelabs/widget'
 
-const results: boolean = await verifyWithZkMeServices(
+// zkKYC
+const { isGrant } = await verifyKycWithZkMeServices(
   appId,
-  userAccount
+  userAccount,
+  // Optional configurations are detailed in the table below
+  options
 )
-
-if (!results) {
-  zkMeWidget.launch()
-}
 ```
 
-| Param            | Type               | Description                                             |
-|------------------|--------------------|---------------------------------------------------------|
-| appId            | string             | This parameter means the same thing as "mchNo"          |
-| userAccount      | string             | Same value as in ``provider.getUserAccounts``           |
-| lv               | VerificationLevel? | ``"zkKYC"`` or ``"Anti-Sybil"``, default ``"zkKYC"``    |
+| Param                  | Type               | Description                                             |
+|------------------------|--------------------|---------------------------------------------------------|
+| appId                  | string             | This parameter means the same thing as "mchNo"          |
+| userAccount            | string             | Same value as in ``provider.getUserAccounts``           |
+| options.programNo      | string?            | The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). If this parameter is not provided, the SDK will use the earliest program you configured in the dashboard as the default value. |
 
 You can also get a way to query a user's zkKYC status from a Smart Contract [here](https://github.com/zkMeLabs/zkme-sdk-js/tree/main/packages/verify-abi#readme).
 
@@ -168,11 +170,9 @@ launch(): void
 Listen to zkMe widget events.
 
 ``` typescript
-on(event: 'finished', callback: FinishedHook): void;
+on(event: 'kycFinished', callback: KycFinishedHook): void;
+on(event: 'meidFinished', callback: MeidFinishedHook): void;
 on(event: 'close', callback: () => void): void;
-
-type FinishedHook = (verifiedAccount: string, kycResults?: KycResults) => void;
-type KycResults = 'matching' | 'mismatch';
 ```
 
 ### switchChain()

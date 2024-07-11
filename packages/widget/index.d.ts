@@ -1,26 +1,74 @@
 /**
- * Verify that the user passes your KYC requirements.
- *
- * @deprecated since version 1.2.0, please use ``verifyWithZkMeServices`` instead.
- * @param appId This parameter means the same thing as ``mchNo``.
- * @param userAccount Same value as in provider.getUserAccounts.
- */
-export declare function verifyKYCWithZkMeServices(appId: string, userAccount: string): Promise<boolean>
-
-/**
  * Verify the user's KYC/MeID status.
  *
+ * @deprecated since version 0.3.0, please use ``verifyKycWithZkMeServices`` or ``verifyMeidWithZkMeServices`` instead.
  * @param appId This parameter means the same thing as ``mchNo``.
  * @param userAccount Same value as in provider.getUserAccounts.
- * @param programNo The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC).
- * @param lv ``"zkKYC"`` or ``"Anti-Sybil"``, default ``"zkKYC"``
+ * @param programNo The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). If this parameter is not provided, the SDK will use the earliest program you configured in the dashboard as the default value.
+ * @param lv ``"zkKYC"`` or ``"MeID"``, default ``"zkKYC"``
  */
-export declare function verifyWithZkMeServices(appId: string, userAccount: string, programNo?: string | number, lv?: VerificationLevel): Promise<boolean>
+export declare function verifyWithZkMeServices(appId: string, userAccount: string, programNo?: string, lv?: VerificationLevel): Promise<boolean>
 
-export type KycResults = 'matching' | 'mismatch'
+/**
+ * Verify the user's KYC status.
+ *
+ * @param appId This parameter means the same thing as ``mchNo``.
+ * @param userAccount Same value as in provider.getUserAccounts.
+ * @param options.programNo The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). If this parameter is not provided, the SDK will use the earliest program you configured in the dashboard as the default value.
+ */
+export declare function verifyKycWithZkMeServices(
+  appId: string,
+  userAccount: string,
+  options?: KycVerificationOptions
+): Promise<{
+  isGrant: boolean
+  verifyTime: number | null
+  verifyTimeAsIso: string | null
+}>
+
+/**
+ * Verify the user's MeID status.
+ *
+ * @param appId This parameter means the same thing as ``mchNo``.
+ * @param userAccount Same value as in provider.getUserAccounts.
+ */
+export declare function verifyMeidWithZkMeServices(
+  appId: string,
+  userAccount: string,
+  options?: MeIdVerificationOptions
+): Promise<{
+  isGrant: boolean
+}>
+
+export type KycVerificationOptions = {
+  /**
+   * The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC).
+   *
+   * If this parameter is not provided, the SDK will use the earliest program you configured in the dashboard as the default value.
+   */
+  programNo?: string
+  endpoint?: string
+}
+
+export type MeIdVerificationOptions = {
+  endpoint?: string
+}
+
+export type KycResults = {
+  isGrant: boolean
+  status: 'matching' | 'mismatch'
+  verifyTime: number | null
+  verifyTimeAsIso: string | null
+  associatedAccount: string,
+  programNo: string
+}
+
+export type MeidResults = {
+  isGrant: boolean,
+  associatedAccount: string
+}
 
 export type TransactionRequest = {
-  type: null | number
   from: string
   to: string
   data: string
@@ -85,18 +133,22 @@ export type AptosSignature = {
   fullMessage: string
 }
 
-export type ZkMeWidgetEvent = 'prepared' | 'close' | 'finished'
+export type ZkMeWidgetEvent = 'prepared' | 'close' | 'finished' | 'kycFinished' | 'meidFinished'
+export type BaseEvent = 'prepared' | 'close' | 'finished'
 
-export type FinishedHook = (verifiedAccount: string, kycResults?: KycResults) => void
+export type FinishedHook = (verifiedAccount: string, kycResults?: 'matching' | 'mismatch') => void
+export type KycFinishedHook = (results: KycResults) => void
+export type MeidFinishedHook = (results: MeidResults) => void
 
 export type ZkMeWidgetMessageBody = {
   id?: string
   channelId: string
   method?: 'getUserAccounts' | 'delegateTransaction' | 'signMessage' | 'getAccessToken'
   params?: TransactionRequest | CosmosTransactionRequest | string
-  kycResults?: KycResults
+  kycResults?: 'matching' | 'mismatch'
   verifiedAddress?: string
-  event?: ZkMeWidgetEvent
+  programNo?: string
+  event?: BaseEvent
   email?: string
 }
 
@@ -135,15 +187,19 @@ export interface Provider {
   signAptosMessage?(payload: AptosSignMessagePayload): Promise<AptosSignature>
 }
 
-export type VerificationLevel = 'zkKYC' | 'Anti-Sybil'
+export type VerificationLevel = 'zkKYC' | 'MeID'
 
 export type LoginMode = 'email' | 'wallet'
 
 export type Theme = 'light' | 'dark' | 'auto'
 
 export type WidgetOptions = {
-  programNo?: string | number
+  programNo?: string
+
   endpoint?: string
+  kycApiEndpoint?: string
+  meidApiEndpoint?: string
+
   accessToken?: string
   /**
    * @default 'zkKYC'
@@ -178,7 +234,7 @@ export type WidgetOptions = {
 export type ZkMeWidgetMemberIndex = 'appId' | 'name' | 'chainId' | 'programNo' | 'accessToken' | 'lv' | 'mode' | 'theme' | 'checkAddress'
 
 export type ZkMeWidgetMember = {
-  [k in ZkMeWidgetMemberIndex]: string | number | undefined
+  [k in ZkMeWidgetMemberIndex]: string | undefined
 }
 
 export declare class ZkMeWidget implements ZkMeWidgetMember {
@@ -188,7 +244,7 @@ export declare class ZkMeWidget implements ZkMeWidgetMember {
 
   get chainId(): string
 
-  get programNo(): string | number | undefined
+  get programNo(): string | undefined
 
   get endpoint(): string | undefined
 
@@ -225,7 +281,12 @@ export declare class ZkMeWidget implements ZkMeWidgetMember {
 
   show(): void
 
+  /**
+   * @deprecated since version 0.3.0, please use ``on('kycFinished', cb)`` or ``on('meidFinished', cb)`` instead.
+   */
   on(event: 'finished', callback: FinishedHook): void
+  on(event: 'kycFinished', callback: KycFinishedHook): void
+  on(event: 'meidFinished', callback: MeidFinishedHook): void
   on(event: 'close', callback: () => void): void
 
   destroy(): void
