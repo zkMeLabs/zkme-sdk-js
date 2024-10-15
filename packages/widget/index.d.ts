@@ -4,7 +4,7 @@
  * @deprecated since version 0.3.0, please use ``verifyKycWithZkMeServices`` or ``verifyMeidWithZkMeServices`` instead.
  * @param appId This parameter means the same thing as ``mchNo``.
  * @param userAccount Same value as in provider.getUserAccounts.
- * @param programNo The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). If this parameter is not provided, the SDK will use the earliest program you configured in the dashboard as the default value.
+ * @param programNo The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). If you do not specify a value for this parameter, the SDK will default to the earliest program you configured in the dashboard.
  * @param lv ``"zkKYC"`` or ``"MeID"``, default ``"zkKYC"``
  */
 export declare function verifyWithZkMeServices(appId: string, userAccount: string, programNo?: string, lv?: VerificationLevel): Promise<boolean>
@@ -14,7 +14,7 @@ export declare function verifyWithZkMeServices(appId: string, userAccount: strin
  *
  * @param appId This parameter means the same thing as ``mchNo``.
  * @param userAccount Same value as in provider.getUserAccounts.
- * @param options.programNo The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). If this parameter is not provided, the SDK will use the earliest program you configured in the dashboard as the default value.
+ * @param options.programNo The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). If you do not specify a value for this parameter, the SDK will default to the earliest program you configured in the dashboard.
  */
 export declare function verifyKycWithZkMeServices(
   appId: string,
@@ -44,7 +44,7 @@ export type KycVerificationOptions = {
   /**
    * The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC).
    *
-   * If this parameter is not provided, the SDK will use the earliest program you configured in the dashboard as the default value.
+   * If you do not specify a value for this parameter, the SDK will default to the earliest program you configured in the dashboard.
    */
   programNo?: string
   endpoint?: string

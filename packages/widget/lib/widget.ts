@@ -75,6 +75,7 @@ export class ZkMeWidget implements _ZkMeWidget {
   #events = new Map<string, (() => void | FinishedHook | KycFinishedHook | MeidFinishedHook)[]>()
   #channelId: string
 
+  #darkSchemeQuery?: MediaQueryList
   #isDestroyed = false
 
   searchParams?: URLSearchParams
@@ -159,6 +160,22 @@ export class ZkMeWidget implements _ZkMeWidget {
     this.searchParams = options?.searchParams
 
     window.addEventListener('message', this.#listener)
+
+    // Fixed the issue where iframe cannot monitor system color theme changes
+    if (
+      (!this.#theme || this.#theme === 'auto') &&
+      window.matchMedia
+    ) {
+      this.#darkSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      this.#darkSchemeQuery.addEventListener('change', this.#handleColorChange)
+    }
+  }
+
+  #handleColorChange = (ev: MediaQueryListEvent) => {
+    this.#widgetNode?.contentWindow?.postMessage({
+      event: 'colorChanged',
+      data: ev.matches ? 'dark' : 'light'
+    }, this.#endpoint || ZKME_WIDGET_ORIGIN)
   }
 
   #listener = async (ev: MessageEvent<ZkMeWidgetMessageBody>) => {
@@ -301,12 +318,15 @@ export class ZkMeWidget implements _ZkMeWidget {
     const params = Array<ZkMeWidgetMemberIndex>('appId', 'name', 'chainId', 'programNo', 'accessToken', 'lv', 'mode', 'theme', 'checkAddress')
     params.forEach((p) => {
       const v = this[p]
-      v && url.searchParams.append(p, String(v))
+      v && url.searchParams.set(p, String(v))
     })
-    url.searchParams.append('origin', location.origin)
-    url.searchParams.append('channelId', this.#channelId)
+    url.searchParams.set('origin', location.origin)
+    url.searchParams.set('channelId', this.#channelId)
+    if (this.#darkSchemeQuery) {
+      url.searchParams.set('sysColor', this.#darkSchemeQuery.matches ? 'dark' : 'light')
+    }
     if (this.#customContainer) {
-      url.searchParams.append('isCustomContainer', '1')
+      url.searchParams.set('isCustomContainer', '1')
     }
 
     if (this.searchParams) {
@@ -345,6 +365,7 @@ export class ZkMeWidget implements _ZkMeWidget {
     }
     if (this.#isDestroyed) {
       window.addEventListener('message', this.#listener)
+      this.#darkSchemeQuery?.addEventListener('change', this.#handleColorChange)
     }
 
     const container = this.#getRootContainer() || document.body
@@ -448,6 +469,7 @@ export class ZkMeWidget implements _ZkMeWidget {
 
   destroy() {
     window.removeEventListener('message', this.#listener)
+    this.#darkSchemeQuery?.removeEventListener('change', this.#handleColorChange)
     this.#clearDom()
     this.#isDestroyed = true
   }

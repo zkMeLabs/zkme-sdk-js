@@ -30,7 +30,7 @@ import { ZkMeWidget, type Provider } from '@zkmelabs/widget'
 const provider: Provider = {
   async getAccessToken() {
     // Request a new token from your backend service and return it to the widget.
-    // For the access token, see https://docs.zk.me/zkme-dochub/zkkyc-compliance-suite/zkkyc-integration-guide/sdk-integration#exchanging-api_key-for-access-token
+    // For the access token, see https://docs.zk.me/zkme-dochub/verify-with-zkme-protocol/integration-guide/javascript-sdk/zkkyc-compliance-suite#how-to-generate-an-access-token-with-api_key
     return fetchNewToken()
   },
 
@@ -91,15 +91,15 @@ const zkMeWidget = new ZkMeWidget(
 | Param             | Type               | Description |
 |-------------------|--------------------|------------------------------------------------------|
 | options.lv        | VerificationLevel? | ``"zkKYC"`` or ``"MeID"``, default ``"zkKYC"`` |
-| options.programNo | string?            | The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). If this parameter is not provided, the SDK will use the earliest program you configured in the dashboard as the default value. |
-| options.theme     | Theme?             | ``"auto"``, ``"light"`` or ``"dark"``, default ``"auto"``. This option must match the settings in the dashboard system (dashboard.zk.me - Integration - UI Design - Set your color mode). |
+| options.programNo | string?            | The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). If you do not specify a value for this parameter, the SDK will default to the earliest program you configured in the dashboard. |
+| options.theme     | Theme?             | ``"auto"``, ``"light"`` or ``"dark"``, default ``"auto"``. |
 
 ### Step 3. Listen to the ``kycFinished``/``meidFinished`` widget events to detect when the user has completed the zkKYC/MeID process.
 
 #### zkKYC
 
 ``` typescript
-async function handleFinished(results) {
+function handleFinished(results) {
   const { isGrant, associatedAccount } = results
 
   if (
@@ -150,8 +150,8 @@ const { isGrant } = await verifyKycWithZkMeServices(
 | Param                  | Type               | Description                                             |
 |------------------------|--------------------|---------------------------------------------------------|
 | appId                  | string             | This parameter means the same thing as "mchNo"          |
-| userAccount            | string             | Same value as in ``provider.getUserAccounts``           |
-| options.programNo      | string?            | The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). If this parameter is not provided, the SDK will use the earliest program you configured in the dashboard as the default value. |
+| userAccount            | string             | The ``userAccount`` info (such as wallet address, email, phone number, or unique identifier) must match the format of accounts returned by ``provider.getUserAccounts``.           |
+| options.programNo      | string?            | The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). If you do not specify a value for this parameter, the SDK will default to the earliest program you configured in the dashboard. |
 
 You can also get a way to query a user's zkKYC status from a Smart Contract [here](https://github.com/zkMeLabs/zkme-sdk-js/tree/main/packages/verify-abi#readme).
 
