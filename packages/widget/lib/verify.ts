@@ -47,6 +47,7 @@ export async function verifyKycWithZkMeServices (appId: string, userAccount: str
   isGrant: boolean
   verifyTime: number | null
   verifyTimeAsIso: string | null
+  programNo: string
 }> {
   const API_URL = options?.endpoint
     ? new URL('api/grant/check_v2', options?.endpoint).href

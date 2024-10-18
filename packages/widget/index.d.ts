@@ -24,6 +24,7 @@ export declare function verifyKycWithZkMeServices(
   isGrant: boolean
   verifyTime: number | null
   verifyTimeAsIso: string | null
+  programNo: string
 }>
 
 /**
