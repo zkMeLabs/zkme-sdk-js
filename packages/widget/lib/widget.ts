@@ -1,4 +1,4 @@
-import type { WidgetOptions, VerificationLevel, LoginMode, Theme, ZkMeWidgetMessageBody, Provider, TransactionRequest, CosmosTransactionRequest, AptosTransactionRequest, ZkMeWidgetEvent, KycFinishedHook, MeidFinishedHook, ZkMeWidgetMemberIndex, ZkMeWidget as _ZkMeWidget, AptosSignMessagePayload, AptosSignature, StdSignature, FinishedHook } from '..'
+import type { WidgetOptions, VerificationLevel, LoginMode, Theme, ZkMeWidgetMessageBody, Provider, TransactionRequest, CosmosTransactionRequest, AptosTransactionRequest, ZkMeWidgetEvent, KycFinishedHook, MeidFinishedHook, ZkMeWidgetMemberIndex, ZkMeWidget as _ZkMeWidget, AptosSignMessagePayload, AptosSignature, StdSignature, FinishedHook, Language } from '..'
 import { verifyKycWithZkMeServices, verifyMeidWithZkMeServices } from './verify';
 
 export const ZKME_WIDGET_ORIGIN = import.meta.env.VITE_ZKME_WIDGET_ORIGIN || 'https://widget.zk.me'
@@ -64,6 +64,7 @@ export class ZkMeWidget implements _ZkMeWidget {
   #mode?: LoginMode
   #theme?: Theme
   // #primaryColor?: string
+  #locale?: Language
   #checkAddress?: boolean
 
   #widgetMask: HTMLElement | null = null
@@ -122,6 +123,10 @@ export class ZkMeWidget implements _ZkMeWidget {
   //   return this.#primaryColor
   // }
 
+  get locale() {
+    return this.#locale
+  }
+
   get checkAddress() {
     if (this.#checkAddress)
       return this.#checkAddress ? '1' : '0'
@@ -154,6 +159,7 @@ export class ZkMeWidget implements _ZkMeWidget {
     this.#mode = options?.mode
     this.#theme = options?.theme
     // this.#primaryColor = options?.primaryColor
+    this.#locale = options?.locale
     this.#checkAddress = options?.checkAddress
     this.#channelId = `${Date.now()}-${ZkMeWidget.#id++}`
     this.#customContainer = options?.rootContainer
@@ -315,7 +321,7 @@ export class ZkMeWidget implements _ZkMeWidget {
 
     const url = new URL(this.#endpoint || ZKME_WIDGET_ORIGIN)
 
-    const params = Array<ZkMeWidgetMemberIndex>('appId', 'name', 'chainId', 'programNo', 'accessToken', 'lv', 'mode', 'theme', 'checkAddress')
+    const params = Array<ZkMeWidgetMemberIndex>('appId', 'name', 'chainId', 'programNo', 'accessToken', 'lv', 'mode', 'theme', 'locale', 'checkAddress')
     params.forEach((p) => {
       const v = this[p]
       v && url.searchParams.set(p, String(v))

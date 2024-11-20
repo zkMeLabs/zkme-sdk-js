@@ -194,6 +194,8 @@ export type LoginMode = 'email' | 'wallet'
 
 export type Theme = 'light' | 'dark' | 'auto'
 
+export type Language = 'en' | 'zh-hk'
+
 export type WidgetOptions = {
   programNo?: string
 
@@ -219,6 +221,7 @@ export type WidgetOptions = {
    * Coming soon.
    */
   // primaryColor?: string
+  locale?: Language
   /**
    * In wallet address login mode (``mode`` = ``"wallet"``), whether or not to check the user's wallet address.
    *
@@ -232,7 +235,7 @@ export type WidgetOptions = {
   searchParams?: URLSearchParams
 }
 
-export type ZkMeWidgetMemberIndex = 'appId' | 'name' | 'chainId' | 'programNo' | 'accessToken' | 'lv' | 'mode' | 'theme' | 'checkAddress'
+export type ZkMeWidgetMemberIndex = 'appId' | 'name' | 'chainId' | 'programNo' | 'accessToken' | 'lv' | 'mode' | 'theme' | 'locale' | 'checkAddress'
 
 export type ZkMeWidgetMember = {
   [k in ZkMeWidgetMemberIndex]: string | undefined
@@ -258,6 +261,8 @@ export declare class ZkMeWidget implements ZkMeWidgetMember {
   get theme(): Theme | undefined
 
   // get primaryColor(): string | undefined
+
+  get locale(): Language | undefined
 
   get checkAddress(): '0' | '1' | undefined
 
