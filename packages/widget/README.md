@@ -74,6 +74,15 @@ const provider: Provider = {
     const txResponse = await aptos.signAndSubmitTransaction(tx)
     return txResponse.hash
   },
+  // TON
+  async delegateTonTransaction(tx) {
+    const { boc } = await tonConnectUI.sendTransaction({
+      validUntil: Date.now() + 5 * 60 * 1000, // You can customize this value
+      messages: [tx]
+    })
+    const { hash } = Cell.fromBase64(boc)
+    return hash().toString('hex')
+  },
   // ...
   // See the Provider interface definition for more details on other chains.
 }
@@ -93,6 +102,7 @@ const zkMeWidget = new ZkMeWidget(
 | options.lv        | VerificationLevel? | ``"zkKYC"`` or ``"MeID"``, default ``"zkKYC"`` |
 | options.programNo | string?            | The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). If you do not specify a value for this parameter, the SDK will default to the earliest program you configured in the dashboard. |
 | options.theme     | Theme?             | ``"auto"``, ``"light"`` or ``"dark"``, default ``"auto"``. |
+| options.locale    | Language?          | ``"en"`` or ``"zh-hk"``, default ``"en"`` |
 
 ### Step 3. Listen to the ``kycFinished``/``meidFinished`` widget events to detect when the user has completed the zkKYC/MeID process.
 

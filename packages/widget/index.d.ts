@@ -41,7 +41,7 @@ export declare function verifyMeidWithZkMeServices(
   isGrant: boolean
 }>
 
-export type KycVerificationOptions = {
+export interface KycVerificationOptions {
   /**
    * The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC).
    *
@@ -51,11 +51,11 @@ export type KycVerificationOptions = {
   endpoint?: string
 }
 
-export type MeIdVerificationOptions = {
+export interface MeIdVerificationOptions {
   endpoint?: string
 }
 
-export type KycResults = {
+export interface KycResults {
   isGrant: boolean
   status: 'matching' | 'mismatch'
   verifyTime: number | null
@@ -64,12 +64,12 @@ export type KycResults = {
   programNo: string
 }
 
-export type MeidResults = {
+export interface MeidResults {
   isGrant: boolean,
   associatedAccount: string
 }
 
-export type TransactionRequest = {
+export interface TransactionRequest {
   from: string
   to: string
   data: string
@@ -100,19 +100,25 @@ export type TransactionRequest = {
   maxPriorityFeePerGas: string | null
 }
 
-export type CosmosTransactionRequest = {
+export interface CosmosTransactionRequest {
   senderAddress: string,
   contractAddress: string,
   msg: any
 }
 
-export type AptosTransactionRequest = {
+export interface AptosTransactionRequest {
   function: string
   type_arguments: Array<string>
   arguments: Array<any>
 }
 
-export type StdSignature = {
+export interface TonTransactionRequest {
+  address: string,
+  amount: string,
+  payload: string,
+}
+
+export interface StdSignature {
   pub_key: {
     type: string
     value: any
@@ -120,7 +126,7 @@ export type StdSignature = {
   signature: string
 }
 
-export type AptosSignMessagePayload = {
+export interface AptosSignMessagePayload {
   address?: boolean; // Should we include the address of the account in the message
   application?: boolean; // Should we include the domain of the dapp
   chainId?: boolean; // Should we include the current chain id the wallet is connected to
@@ -128,7 +134,7 @@ export type AptosSignMessagePayload = {
   nonce: number | string; // A nonce the dapp should generate
 }
 
-export type AptosSignature = {
+export interface AptosSignature {
   signature: string
   publicKey: string
   fullMessage: string
@@ -141,11 +147,11 @@ export type FinishedHook = (verifiedAccount: string, kycResults?: 'matching' | '
 export type KycFinishedHook = (results: KycResults) => void
 export type MeidFinishedHook = (results: MeidResults) => void
 
-export type ZkMeWidgetMessageBody = {
+export interface ZkMeWidgetMessageBody {
   id?: string
   channelId: string
   method?: 'getUserAccounts' | 'delegateTransaction' | 'signMessage' | 'getAccessToken'
-  params?: TransactionRequest | CosmosTransactionRequest | string
+  params?: TransactionRequest | CosmosTransactionRequest | AptosTransactionRequest | TonTransactionRequest | string
   kycResults?: 'matching' | 'mismatch'
   verifiedAddress?: string
   programNo?: string
@@ -175,6 +181,10 @@ export interface Provider {
    */
   delegateAptosTransaction?(tx: AptosTransactionRequest): Promise<TransactionHash>
   /**
+   * This method is the same as ``delegateTransaction``, but it is an TON blockchain transaction, just implement one of them depending on the type of blockchain your project is running on.
+   */
+  delegateTonTransaction?(tx: TonTransactionRequest): Promise<TransactionHash>
+  /**
    * This method is used to get a new AccessToken from you.
    */
   getAccessToken(): Promise<string>
@@ -196,7 +206,7 @@ export type Theme = 'light' | 'dark' | 'auto'
 
 export type Language = 'en' | 'zh-hk'
 
-export type WidgetOptions = {
+export interface WidgetOptions {
   programNo?: string
 
   endpoint?: string

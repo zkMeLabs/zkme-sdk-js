@@ -1,4 +1,4 @@
-import type { WidgetOptions, VerificationLevel, LoginMode, Theme, ZkMeWidgetMessageBody, Provider, TransactionRequest, CosmosTransactionRequest, AptosTransactionRequest, ZkMeWidgetEvent, KycFinishedHook, MeidFinishedHook, ZkMeWidgetMemberIndex, ZkMeWidget as _ZkMeWidget, AptosSignMessagePayload, AptosSignature, StdSignature, FinishedHook, Language } from '..'
+import type { WidgetOptions, VerificationLevel, LoginMode, Theme, ZkMeWidgetMessageBody, Provider, TransactionRequest, CosmosTransactionRequest, AptosTransactionRequest, ZkMeWidgetEvent, KycFinishedHook, MeidFinishedHook, ZkMeWidgetMemberIndex, ZkMeWidget as _ZkMeWidget, AptosSignMessagePayload, AptosSignature, StdSignature, FinishedHook, Language, TonTransactionRequest } from '..'
 import { verifyKycWithZkMeServices, verifyMeidWithZkMeServices } from './verify';
 
 export const ZKME_WIDGET_ORIGIN = import.meta.env.VITE_ZKME_WIDGET_ORIGIN || 'https://widget.zk.me'
@@ -280,6 +280,8 @@ export class ZkMeWidget implements _ZkMeWidget {
           txHash = await this.#provider.delegateCosmosTransaction!(params)
         } else if (is<AptosTransactionRequest>(params, 'function')) {
           txHash = await this.#provider.delegateAptosTransaction!(params)
+        } else if (is<TonTransactionRequest>(params, 'payload')) {
+          txHash = await this.#provider.delegateTonTransaction!(params)
         } else {
           txHash = await this.#provider.delegateTransaction!(params as TransactionRequest)
         }
