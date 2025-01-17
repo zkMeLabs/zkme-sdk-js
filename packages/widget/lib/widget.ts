@@ -414,7 +414,7 @@ export class ZkMeWidget implements _ZkMeWidget {
             <div class="right-point"></div>
           </div>
         </div>
-        <iframe allow="camera" src="${src}" width="100%" height="100%"></iframe>
+        <iframe allow="camera; clipboard-write; geolocation" src="${src}" width="100%" height="100%"></iframe>
       </div>
     `
     this.#widgetNode = this.#widgetMask.querySelector('iframe')
