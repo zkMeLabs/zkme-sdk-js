@@ -1,4 +1,4 @@
-import type { WidgetOptions, VerificationLevel, LoginMode, Theme, ZkMeWidgetMessageBody, Provider, TransactionRequest, CosmosTransactionRequest, AptosTransactionRequest, ZkMeWidgetEvent, KycFinishedHook, MeidFinishedHook, ZkMeWidgetMemberIndex, ZkMeWidget as _ZkMeWidget, AptosSignMessagePayload, AptosSignature, StdSignature, FinishedHook, Language, TonTransactionRequest } from '..'
+import type { WidgetOptions, VerificationLevel, LoginMode, Theme, ZkMeWidgetMessageBody, Provider, TransactionRequest, CosmosTransactionRequest, AptosTransactionRequest, ZkMeWidgetEvent, KycFinishedHook, MeidFinishedHook, ZkMeWidgetMemberIndex, ZkMeWidget as _ZkMeWidget, AptosSignMessagePayload, AptosSignature, StdSignature, FinishedHook, Language, TonTransactionRequest, SolanaTransactionRequest, SolanaSignature } from '..'
 import { verifyKycWithZkMeServices, verifyMeidWithZkMeServices } from './verify';
 
 export const ZKME_WIDGET_ORIGIN = import.meta.env.VITE_ZKME_WIDGET_ORIGIN || 'https://widget.zk.me'
@@ -282,6 +282,8 @@ export class ZkMeWidget implements _ZkMeWidget {
           txHash = await this.#provider.delegateAptosTransaction!(params)
         } else if (is<TonTransactionRequest>(params, 'payload')) {
           txHash = await this.#provider.delegateTonTransaction!(params)
+        } else if (is<SolanaTransactionRequest>(params, 'message')) {
+          txHash = await this.#provider.delegateSolanaTransaction!(params)
         } else {
           txHash = await this.#provider.delegateTransaction!(params as TransactionRequest)
         }
@@ -300,9 +302,15 @@ export class ZkMeWidget implements _ZkMeWidget {
 
     } else if (method === 'signMessage') {
       try {
-        let results: string | StdSignature | AptosSignature
+        let results: string | StdSignature | AptosSignature | SolanaSignature
 
-        if (typeof params === 'string') {
+        if (this.chainId.includes('solana')) {
+          if (!this.#provider.signSolanaMessage) {
+            throw new Error('The provider does not implement the "signSolanaMessage" method.')
+          }
+          const msg = new TextEncoder().encode(params as string)
+          results = await this.#provider.signSolanaMessage(msg)
+        } else if (typeof params === 'string') {
           results = await this.#provider.signMessage!(params)
         } else {
           if (!this.#provider.signAptosMessage) {

@@ -118,6 +118,10 @@ export interface TonTransactionRequest {
   payload: string,
 }
 
+export interface SolanaTransactionRequest {
+  message: string
+}
+
 export interface StdSignature {
   pub_key: {
     type: string
@@ -140,6 +144,19 @@ export interface AptosSignature {
   fullMessage: string
 }
 
+export type Base58String = string
+
+export interface SolanaSignature {
+  /**
+   * bas58 string
+   */
+  signature: Base58String
+  /**
+   * bas58 string
+   */
+  publicKey: Base58String
+}
+
 export type ZkMeWidgetEvent = 'prepared' | 'close' | 'finished' | 'kycFinished' | 'meidFinished'
 export type BaseEvent = 'prepared' | 'close' | 'finished'
 
@@ -151,7 +168,7 @@ export interface ZkMeWidgetMessageBody {
   id?: string
   channelId: string
   method?: 'getUserAccounts' | 'delegateTransaction' | 'signMessage' | 'getAccessToken'
-  params?: TransactionRequest | CosmosTransactionRequest | AptosTransactionRequest | TonTransactionRequest | string
+  params?: TransactionRequest | CosmosTransactionRequest | AptosTransactionRequest | TonTransactionRequest | SolanaTransactionRequest | string
   kycResults?: 'matching' | 'mismatch'
   verifiedAddress?: string
   programNo?: string
@@ -185,6 +202,10 @@ export interface Provider {
    */
   delegateTonTransaction?(tx: TonTransactionRequest): Promise<TransactionHash>
   /**
+   * This method is the same as ``delegateTransaction``, but it is an Solana blockchain transaction, just implement one of them depending on the type of blockchain your project is running on.
+   */
+  delegateSolanaTransaction?(tx: SolanaTransactionRequest): Promise<string>
+  /**
    * This method is used to get a new AccessToken from you.
    */
   getAccessToken(): Promise<string>
@@ -196,6 +217,10 @@ export interface Provider {
    * This method is the same as ``signMessage``, just implement one of them depending on the type of blockchain your project is running on.
    */
   signAptosMessage?(payload: AptosSignMessagePayload): Promise<AptosSignature>
+  /**
+   * This method is the same as ``signMessage``, just implement one of them depending on the type of blockchain your project is running on.
+   */
+  signSolanaMessage?(payload: Uint8Array): Promise<SolanaSignature>
 }
 
 export type VerificationLevel = 'zkKYC' | 'MeID'

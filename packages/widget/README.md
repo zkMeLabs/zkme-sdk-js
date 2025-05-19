@@ -56,6 +56,7 @@ const provider: Provider = {
 
   // EVM
   async delegateTransaction(tx) {
+    // Replace with your actual signer
     const txResponse = await signer.sendTransaction(tx)
     return txResponse.hash
   },
@@ -82,6 +83,14 @@ const provider: Provider = {
     })
     const { hash } = Cell.fromBase64(boc)
     return hash().toString('hex')
+  },
+  // Solana
+  async delegateSolanaTransaction({ message }) {
+    const tx = Transaction.populate(Message.from(bs58.decode(message)))
+    // Replace with your actual signer
+    const txid = await signer.signAndSendTransaction(tx)
+    return txid
+  },
   },
   // ...
   // See the Provider interface definition for more details on other chains.
