@@ -1,0 +1,43 @@
+{
+  "name": "@zkmelabs/kyb-widget",
+  "version": "0.1.1",
+  "type": "module",
+  "files": [
+    "dist",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./widget": {
+      "import": "./dist/widget.js",
+      "require": "./dist/widget.cjs"
+    },
+    "./dist/style.css": "./dist/style.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zkMeLabs/zkme-sdk-js.git",
+    "directory": "packages/kyb-widget"
+  },
+  "homepage": "https://github.com/zkMeLabs/zkme-sdk-js#readme",
+  "keywords": [
+    "zkme",
+    "zkkyb"
+  ],
+  "author": {
+    "name": "zkMeLabs",
+    "url": "https://zk.me/"
+  },
+  "license": "MIT"
+}

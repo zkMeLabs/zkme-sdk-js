@@ -9,4 +9,5 @@ zkMe SDK for Javascript consists of smaller NPM packages within the @zkmelabs na
 | Package                         | Description                                                                                                  |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | [@zkmelabs/widget](packages/widget)   | zkMe zkKYC and Anti-Sybil SDK. |
+| [@zkmelabs/kyb-widget](packages/kyb-widget)   | zkMe zkKYB SDK. |
 | [@zkmelabs/verify-abi](packages/verify-abi) | zkMe Verify & Certify Smart Contract ABI.   |
