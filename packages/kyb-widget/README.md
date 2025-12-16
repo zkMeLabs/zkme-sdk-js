@@ -29,57 +29,68 @@ import { ZkMeKybWidget, type Provider } from '@zkmelabs/kyb-widget'
 
 const provider: Provider = {
   async getAccessToken() {
+    // -------------------------TODO-------------------------
     // Request a new token from your backend service and return it to the widget.
-    // For the access token, see https://docs.zk.me/hub/~/changes/176/start/zkkyb-checklist/intergration-checklist/zkkyb#how-to-generate-an-access-token-with-api_key
+    // For the access token, see https://docs.zk.me/hub/start/zkKYB/integration/js-sdk/zkkyb#how-to-generate-an-access-token-with-api_key
+    // ------------------------------------------------------
     return fetchNewToken()
   },
 
-  async getUserAccounts() {
-    // If your project is a Dapp,
-    // you need to return the user's connected wallet address.
-    const userConnectedAddress = await connect()
-    return [userConnectedAddress]
-
-    // If not,
-    // you should return the user's e-mail address, phone number or any other unique identifier.
-    //
-    // return ['email address']
-    // or
-    // return ['phone number']
-    // or
-    // return ['unique identifier']
+  async getExternalID() {
+    // -------------------------TODO-------------------------
+    // `ExternalID` represents the unique identifier of this user in your system.
+    // Typical examples include a corporate e-mail address, phone number,
+    // or an internal user ID. Use the same identifier consistently
+    // whenever you query or verify this user's KYB status.
+    // ------------------------------------------------------
+    return [externalID]
   },
   },
 }
 
 const zkMeKybWidget = new ZkMeKybWidget(
+  // -------------------------TODO-------------------------
   appId, // This parameter means the same thing as "mchNo"
   'YourDappName',
   provider,
-  // Optional configurations are detailed in the table below
-  options
+  {
+      programNo: 'YourProgramNo' // You can find the Program No in the ‘Configuration’ section of your KYB dashboard
+      // For other options, please refer to the table below
+  }
+  // ------------------------------------------------------
 )
 ```
 
 | Param             | Type    | Description                                                                                                                                                                                                                                                               |
 | ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| options.programNo | string? | The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYB). If you do not specify a value for this parameter, the SDK will default to the earliest program you configured in the dashboard. |
+| options.programNo | string? | If you have activated multiple programs running in parallel, please pay attention to this setting:<br><br>The param can be found in Dashboard and please make sure the program is enabled. The SDK will take the number of the first activated program as the default value if this parameter is not provided in the code. |
 
-### Step 3. Listen to the `kybFinished` widget events to detect when the user has completed the zkKYB/MeID process.
-
-#### zkKYB
+### Step 3. Listen to the `kybFinished` widget events to detect when the user has completed the zkKYB process.
 
 ```typescript
 function handleKybFinished(results) {
-  const { status, associatedAccount, zkMeAccount, programNo } = results;
+  const { status, externalID, zkMeAccount, programNo } = results;
 
-  if (status === 5 && associatedAccount === userConnectedAddress.toLowerCase()) {
-    // Prompts the user that zkKYB verification has been completed
+  if (status === 5 && externalID === userConnectedAddress.toLowerCase()) {
+    // -------------------------TODO-------------------------
+    // The user has successfully completed zkKYB verification.
+    // Prompt the user that verification has been completed.
+    // ------------------------------------------------------
+    console.log(`KYB verification completed for ${externalID}`)
   }
 }
 
 zkMeKybWidget.on("kybFinished", handleKybFinished);
 ```
+#### Event Callback Parameters
+
+The `kybFinished` event callback receives a `results` object with the following properties:
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| status | int | Indicates the current verification status of the KYB process.<br><br>Status codes are defined as follows:<br>• `1` – Verification Started<br>• `2` – Info Submitted<br>• `3` – Under Review<br>• `4` – Resubmission Required<br>• `5` – Verification Passed<br>• `6` – Verification Failed |
+| externalID | string | The entity identifier from your system, echoed back by the SDK. This is the same value you returned as `externalID` in the `getExternalID()` function (for example, a corporate email address, phone number, or an internal user ID). |
+| zkMeAccount | string | The zkMe internal account identifier. |
 
 ### Step 4. Launch the zkMe widget and it will be displayed in the center of your webpage.
 
@@ -101,20 +112,19 @@ import { verifyKybWithZkMeServices } from "@zkmelabs/kyb-widget";
 
 // zkKYB
 const { status, statusDesc } = await verifyKybWithZkMeServices(
-  appId,
-  userAccount,
-  accessToken,
-  // Optional configurations are detailed in the table below
-  options
+  appId, // Your unique App ID (mchNo)
+  externalID, // The user's unique identifier (e.g., corporate email)
+  accessToken, // Access token from your backend
+  options // Optional configurations are detailed in the table below
 );
 ```
 
 | Param             | Type    | Description                                                                                                                                                                                                                                                               |
 | ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | appId             | string  | This parameter means the same thing as "mchNo"                                                                                                                                                                                                                            |
-| userAccount       | string  | The `userAccount` info (such as wallet address, email, phone number, or unique identifier) must match the format of accounts returned by `provider.getUserAccounts`.                                                                                                      |
+| externalID       | string  | The unique identifier provided by you to reference the KYB entity to be verified. This should match the `getExternalID()` passed by `provider.getExternalID`.                                                                                                      |
 | accessToken       | string  | The access token obtained from your backend service..                                                                                                                                                                                                          |
-| options.programNo | string? | The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYB). If you do not specify a value for this parameter, the SDK will default to the earliest program you configured in the dashboard. |
+| options.programNo | string? | If you have activated multiple programs running in parallel, please pay attention to this setting: <br><br>The param can be found in Dashboard and please make sure the program is enabled.The SDK will take the number of the first activated program as the default value if this parameter is not provided in the code. |
 
 ### Response Fields:
 
@@ -151,10 +161,10 @@ POST https://agw.zk.me/kybpopup/api/kyb/getBusinessStatus
 
 | Parameter      | Type   | Required | Description                                                                                  |
 | -------------- | ------ | -------- | -------------------------------------------------------------------------------------------- |
-| programNo      | string | Yes      | The Program No from your Dashboard.                                                          |
-| accessToken    | string | Yes      | The access token obtained from your backend service.                                         |
-| mchNo          | string | Yes      | Your unique merchant number (same as `appId`).                                               |
-| partnerUserId  | string | Yes      | The merchant-side unique identifier (e.g., corporate email).                                 |
+| programNo      | string | Yes      | Same as the programNo you pass for the SDK  integration.                                                          |
+| accessToken    | string | Yes      | Same as the Access Token used in the SDK integration.                                         |
+| mchNo          | string | Yes      | Same as AppID.                                               |
+| externalID  | string | Yes      | The unique identifier provided by you to reference the KYB entity to be verified. This should match the `getExternalID()` passed during SDK integration.                                 |
 
 ### Request Example:
 
@@ -163,7 +173,7 @@ POST https://agw.zk.me/kybpopup/api/kyb/getBusinessStatus
   "programNo": "eyJhbGciOiJSUzI1NiIsImltcCI6ICI6IjFlOWkazcifQ.eyJuV1l1jIjoiSmFuZSBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9.xxxxxx",
   "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.xxxxxx",
   "mchNo": "merchant_123456",
-  "partnerUserId": "f1215345"
+  "externalID": "f1215345"
 }
 ```
 

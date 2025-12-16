@@ -4,12 +4,12 @@
  * Verify the user's KYC status.
  *
  * @param appId This parameter means the same thing as ``mchNo``.
- * @param userAccount Same value as in provider.getUserAccounts.
+ * @param externalID Same value as in provider.getExternalID.
  * @param options.programNo The number of the program created in the dashboard system and make sure the program is enabled (dashboard.zk.me - Configuration - zkKYC). If you do not specify a value for this parameter, the SDK will default to the earliest program you configured in the dashboard.
  */
 export declare function verifyKybWithZkMeServices(
   appId: string,
-  userAccount: string,
+  externalID: string,
   accessToken: string,
   options?: KybVerificationOptions
 ): Promise<{
@@ -22,11 +22,11 @@ export declare function verifyKybWithZkMeServices(
  * Verify the user's MeID status.
  *
  * @param appId This parameter means the same thing as ``mchNo``.
- * @param userAccount Same value as in provider.getUserAccounts.
+ * @param externalID Same value as in provider.getExternalID.
  */
 export declare function verifyMeidWithZkMeServices(
   appId: string,
-  userAccount: string,
+  externalID: string,
   options?: MeIdVerificationOptions
 ): Promise<{
   isGrant: boolean;
@@ -48,7 +48,7 @@ export interface MeIdVerificationOptions {
 
 export interface KybResults {
   status: number;
-  associatedAccount: string;
+  externalID: string;
   zkMeAccount: string;
   programNo: string;
 }
@@ -167,7 +167,7 @@ export interface ZkMeWidgetMessageBody {
   id?: string;
   channelId: string;
   method?:
-    | "getUserAccounts"
+    | "getExternalID"
     | "delegateTransaction"
     | "signMessage"
     | "getAccessToken"
@@ -196,7 +196,7 @@ export interface Provider {
    *
    * If your project is a Dapp, you need to return the user's connected wallet address, if not, you should return the user's e-mail address, phone number or any other unique identifier.
    */
-  getUserAccounts(): Promise<string[]>;
+  getExternalID(): Promise<string[]>;
   /**
    * When a user authorizes his ZIS to you, we delegate to you the task of requesting the user's approval of the transaction. This method must be implemented when ``options.lv`` is ``"zkKYC"`` and your project is running on EVM-compatible blockchain.
    */

@@ -9,7 +9,7 @@ type ResultBody = {
 
 export async function verifyKybWithZkMeServices(
   appId: string,
-  userAccount: string,
+  externalID: string,
   accessToken: string,
   options?: KybVerificationOptions
 ): Promise<{
@@ -24,7 +24,7 @@ export async function verifyKybWithZkMeServices(
     programNo: options?.programNo,
     accessToken,
     mchNo: appId,
-    partnerUserId: userAccount,
+    externalID,
   };
 
   return fetch(API_URL, {

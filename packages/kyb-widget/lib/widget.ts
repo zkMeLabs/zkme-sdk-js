@@ -156,7 +156,7 @@ export class ZkMeKybWidget implements _ZkMeWidget {
     ) {
       const formattedResults = {
         status: kybStatus,
-        associatedAccount: verifiedAddress,
+        externalID: verifiedAddress,
         zkMeAccount,
         programNo: programNo || this.#programNo || "",
       };
@@ -202,9 +202,9 @@ export class ZkMeKybWidget implements _ZkMeWidget {
       );
     };
 
-    if (method === "getUserAccounts") {
+    if (method === "getExternalID") {
       try {
-        const accounts = await this.#provider.getUserAccounts();
+        const accounts = await this.#provider.getExternalID();
         handleApprove(accounts);
       } catch (err: any) {
         handleReject(formatErrorMessage(err));
@@ -318,6 +318,14 @@ export class ZkMeKybWidget implements _ZkMeWidget {
 
     this.#widgetMask.innerHTML = `
       <div class="zkme-widget-wrap" style="${wrapStyle}">
+        <div class="zkme-loading">
+          <div class="left-cylinder">
+            <div class="left-point"></div>
+          </div>
+          <div class="right-cylinder">
+            <div class="right-point"></div>
+          </div>
+        </div>
         <iframe allow="camera; clipboard-write; geolocation" src="${src}" width="100%" height="100%"></iframe>
       </div>
     `;
@@ -377,11 +385,11 @@ export class ZkMeKybWidget implements _ZkMeWidget {
 
   verifyKybWithZkMeServices(
     appId: string,
-    userAccount: string,
+    externalID: string,
     accessToken: string,
     programNo?: string
   ) {
-    return verifyKybWithZkMeServices(appId, userAccount, accessToken, {
+    return verifyKybWithZkMeServices(appId, externalID, accessToken, {
       programNo: programNo || this.#programNo,
       endpoint: this.#kybApiEndpoint,
     });
