@@ -19,7 +19,7 @@ export async function verifyKybWithZkMeServices(
 }> {
   const API_URL = options?.endpoint
     ? new URL("api/kyb/getBusinessStatus", options?.endpoint).href
-    : "https://test-agw.zk.me/kybpopup/api/kyb/getBusinessStatus";
+    : "https://agw.zk.me/kybpopup/api/kyb/getBusinessStatus";
   const data = {
     programNo: options?.programNo,
     accessToken,
@@ -31,7 +31,6 @@ export async function verifyKybWithZkMeServices(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-test": "true",
     },
     body: JSON.stringify(data),
   })

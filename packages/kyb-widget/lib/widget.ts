@@ -12,7 +12,7 @@ import { verifyKybWithZkMeServices } from "./verify";
 import { ToastManager } from "./toast-manager";
 
 export const ZKME_WIDGET_ORIGIN =
-  import.meta.env.VITE_ZKME_WIDGET_ORIGIN || "https://kyb-widget.zk.me/";
+  import.meta.env.VITE_ZKME_WIDGET_ORIGIN || "https://kyb-widget.zk.me";
 
 function getMaxZIndex() {
   return Math.max(
@@ -53,6 +53,14 @@ function formatErrorMessage(error: any): string {
     //
   }
   return error?.message || "Unknown error";
+}
+
+function originEqual (origin1: string, origin2: string) {
+  try {
+    return new URL(origin1).origin === new URL(origin2).origin
+  } catch {
+    return false
+  }
 }
 
 export class ZkMeKybWidget implements _ZkMeWidget {
@@ -128,7 +136,7 @@ export class ZkMeKybWidget implements _ZkMeWidget {
 
   #listener = async (ev: MessageEvent<ZkMeWidgetMessageBody>) => {
     if (
-      ev.origin !== (this.endpoint || ZKME_WIDGET_ORIGIN) ||
+      !originEqual(ev.origin, this.endpoint || ZKME_WIDGET_ORIGIN) ||
       this.#channelId !== ev.data.channelId
     ) {
       return;
